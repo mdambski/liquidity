@@ -8,8 +8,6 @@ from liquidity.data.providers.base import DataProviderBase
 def get_data_provider(ticker: str) -> DataProviderBase:
     """Returns data provider for the ticker."""
     metadata = get_ticker_metadata(ticker)
-    match metadata.type:
-        case AssetTypes.Crypto:
-            return AlpacaCryptoDataProvider()
-        case _:
-            return AlphaVantageDataProvider()
+    if metadata.type == AssetTypes.Crypto:
+        return AlpacaCryptoDataProvider()
+    return AlphaVantageDataProvider()

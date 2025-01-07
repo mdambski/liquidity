@@ -8,11 +8,12 @@ from liquidity.data.metadata.fields import OHLCV, Fields
 @pytest.fixture
 def data_provider():
     provider = AlphaVantageDataProvider()
-    assert provider.api_key is not None, (
-        "Missing Alpha vantage api key. Make sure "
-        "ALPHAVANTAGE_API_KEY env variable is set"
-        "in order to run test using real api call."
-    )
+    if provider.api_key is None:
+        raise ValueError(
+            "Missing Alpha vantage api key. Make sure "
+            "ALPHAVANTAGE_API_KEY env variable is set"
+            "in order to run test using real api call."
+        )
     yield provider
 
 

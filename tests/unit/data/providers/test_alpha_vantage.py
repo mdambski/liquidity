@@ -1,5 +1,5 @@
 import os
-from mock import patch
+from unittest.mock import patch
 
 import pytest
 from liquidity.data.providers.alpha_vantage import (

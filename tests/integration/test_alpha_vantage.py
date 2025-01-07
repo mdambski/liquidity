@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 import urllib.parse
 from liquidity.data.providers.alpha_vantage import AlphaVantageDataProvider
-from liquidity.data.metadata.fields import OHLCV, DIVIDENDS, DATE
+from liquidity.data.metadata.fields import OHLCV, Fields
 import responses
 from pandas import testing as pdt
 
@@ -19,7 +19,7 @@ def ticker():
 
 @pytest.fixture
 def av_base_api_url(api_key, ticker):
-    return f"https://www.alphavantage.co/query?"
+    return "https://www.alphavantage.co/query?"
 
 
 @pytest.fixture
@@ -140,10 +140,10 @@ def test_retrieve_dividend_data(data_provider, av_dividend_mock_url, ticker):
 
     expected = pd.DataFrame(
         data={
-            DIVIDENDS: [1.67, 1.71],
-            DATE: [pd.to_datetime(x) for x in ["2024-08-09", "2024-05-09"]],
+            Fields.Dividends: [1.67, 1.71],
+            Fields.Date: [pd.to_datetime(x) for x in ["2024-08-09", "2024-05-09"]],
         }
-    ).set_index(DATE)
+    ).set_index(Fields.Date)
 
     actual = data_provider.get_dividends(ticker)
 

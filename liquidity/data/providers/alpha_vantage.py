@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import StrEnum
+from typing import Optional
 
 import pandas as pd
 from alpha_vantage.fundamentaldata import FundamentalData
@@ -15,13 +15,8 @@ from liquidity.data.providers.base import DataProviderBase
 from liquidity.data.format import formatter_factory
 
 
-class OutputSize(StrEnum):
-    COMPACT = "compact"
-    FULL = "full"
-
-
 class AlphaVantageConfig(BaseSettings):
-    api_key: str | None = Field(default=None, alias="ALPHAVANTAGE_API_KEY")
+    api_key: Optional[str] = Field(default=None, alias="ALPHAVANTAGE_API_KEY")
 
 
 class AlphaVantageDataProvider(DataProviderBase):
