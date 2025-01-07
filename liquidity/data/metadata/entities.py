@@ -1,13 +1,14 @@
 import datetime
 from dataclasses import dataclass
-from enum import StrEnum, auto
+from enum import Enum
+from typing import Optional
 
 
-class AssetTypes(StrEnum):
-    Stock = auto()
-    ETF = auto()
-    Index = auto()
-    Crypto = auto()
+class AssetTypes(str, Enum):
+    Stock = "Stock"
+    ETF = "ETF"
+    Index = "Index"
+    Crypto = "Crypto"
 
 
 @dataclass
@@ -16,8 +17,8 @@ class AssetMetadata:
     name: str
     type: AssetTypes
     subtype: str
-    currency: str | None = None
-    start_date: datetime.date | None = None
+    currency: Optional[str] = None
+    start_date: Optional[datetime.date] = None
     distributing: bool = False
     distribution_frequency: int = 0
 

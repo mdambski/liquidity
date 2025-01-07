@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from liquidity.data.metadata.entities import AssetTypes, AssetMetadata
 
@@ -53,7 +54,9 @@ ALL_ASSETS = {
 }
 
 
-def get_asset_catalog(asset_type: AssetTypes | None = None) -> dict[str, AssetMetadata]:
+def get_asset_catalog(
+    asset_type: Optional[AssetTypes] = None,
+) -> dict[str, AssetMetadata]:
     """Returns catalog of assets of the specified type."""
     if asset_type:
         return {k: v for k, v in ALL_ASSETS.items() if v.type == asset_type}
