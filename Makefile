@@ -1,5 +1,5 @@
-.PHONY: lint
-lint:
+.PHONY: delint
+delint:
 	poetry run ruff check --fix-only
 	poetry run ruff format .
 
@@ -9,11 +9,11 @@ mypy:
 
 .PHONY: test
 test:
-	poetry run pytest tests --ignore tests/e2e
+	poetry run pytest tests --ignore tests/e2e --tb=short
 
 .PHONY: test-e2e
 test-e2e:
-	poetry run pytest tests/e2e
+	poetry run pytest tests/e2e --tb=short
 
 .PHONY: install-deps
 install-deps:

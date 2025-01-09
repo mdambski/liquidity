@@ -4,6 +4,7 @@ from typing import Optional
 
 import pandas as pd
 from alpha_vantage.fundamentaldata import FundamentalData
+from alpha_vantage.econindicators import EconIndicators
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -50,3 +51,14 @@ class AlphaVantageDataProvider(DataProviderBase):
             to_numeric=[Fields.Dividends],
         )
         return av_dividend_formatter(df)
+
+    def get_treasury_yield(self, maturity: str) -> pd.DataFrame:
+        client = EconIndicators(self.api_key, output_format="pandas")
+        df, _ = client.get_treasury_yield(maturity=maturity)
+        av_treasury_yield_formatter = formatter_factory(
+            cols_mapper={"date": Fields.Date, "value": Fields.Yield},
+            index_col=Fields.Date,
+            cols_out=[Fields.Yield],
+            to_numeric=[Fields.Yield],
+        )
+        return av_treasury_yield_formatter(df)

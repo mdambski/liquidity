@@ -1,51 +1,79 @@
+import json
+
 import pandas as pd
 import pytest
 import urllib.parse
-from liquidity.data.providers.alpha_vantage import AlphaVantageDataProvider
 from liquidity.data.metadata.fields import OHLCV, Fields
 import responses
 from pandas import testing as pdt
 
 
-@pytest.fixture
-def api_key():
-    return "fake-api-key"
+class TestTreasuryYieldData:
+    @pytest.fixture
+    def api_url_mock(self, av_base_api_url, api_key):
+        params = {
+            "apikey": api_key,
+            "interval": "monthly",
+            "maturity": "10year",
+            "datatype": "json",
+            "function": "TREASURY_YIELD",
+        }
+        return "".join([av_base_api_url, urllib.parse.urlencode(params)])
+
+    @pytest.fixture
+    def api_response_json(self, treasury_yield_fixture_path):
+        with open(treasury_yield_fixture_path, mode="r") as f:
+            data = json.load(f)
+        return data
+
+    @responses.activate
+    def test_treasury_yield_data(
+        self, av_data_provider, api_url_mock, api_response_json
+    ):
+        responses.add(
+            responses.GET,
+            url=api_url_mock,
+            json=api_response_json,
+            status=200,
+            content_type="json",
+        )
+
+        df = av_data_provider.get_treasury_yield(maturity="10year")
+
+        assert df.shape == (24, 1)
+        assert set(df.columns) == {Fields.Yield}
+        assert isinstance(df.index, pd.DatetimeIndex)
+
+        # check if selected fields match and have correct format
+        pdt.assert_frame_equal(
+            df.loc[["2024-12-01", "2023-01-01"]],
+            pd.DataFrame(
+                data={
+                    Fields.Yield: [4.39, 3.53],
+                    Fields.Date: [
+                        pd.to_datetime(x) for x in ["2024-12-01", "2023-01-01"]
+                    ],
+                }
+            ).set_index(Fields.Date),
+            check_names=False,
+        )
 
 
-@pytest.fixture
-def ticker():
-    return "AAPL"
+class TestPriceData:
+    @pytest.fixture
+    def api_url_mock(self, av_base_api_url, api_key, ticker):
+        params = {
+            "symbol": ticker,
+            "apikey": api_key,
+            "datatype": "json",
+            "outputsize": "full",
+            "function": "TIME_SERIES_DAILY",
+        }
+        return "".join([av_base_api_url, urllib.parse.urlencode(params)])
 
-
-@pytest.fixture
-def av_base_api_url(api_key, ticker):
-    return "https://www.alphavantage.co/query?"
-
-
-@pytest.fixture
-def data_provider(api_key):
-    return AlphaVantageDataProvider(api_key)
-
-
-@pytest.fixture
-def av_price_mock_url(av_base_api_url, ticker, api_key):
-    params = {
-        "symbol": ticker,
-        "apikey": api_key,
-        "datatype": "json",
-        "outputsize": "full",
-        "function": "TIME_SERIES_DAILY",
-    }
-    encoded_query_params = urllib.parse.urlencode(params)
-    return f"{av_base_api_url}{encoded_query_params}"
-
-
-@responses.activate
-def test_retrieve_price_data(data_provider, av_price_mock_url, ticker):
-    responses.add(
-        responses.GET,
-        url=av_price_mock_url,
-        json={
+    @pytest.fixture
+    def api_response_json(self, ticker):
+        return {
             "Meta Data": {
                 "1. Information": "Daily Prices (open, high, low, close) and Volumes",
                 "2. Symbol": ticker,
@@ -69,24 +97,27 @@ def test_retrieve_price_data(data_provider, av_price_mock_url, ticker):
                     "5. volume": "2989594",
                 },
             },
-        },
-        status=200,
-        content_type="json",
-    )
+        }
 
-    df = data_provider.get_prices(ticker, output_size="full")
-    assert isinstance(df.index, pd.DatetimeIndex)
-    assert set(df.columns) == {
-        OHLCV.Open,
-        OHLCV.High,
-        OHLCV.Low,
-        OHLCV.Close,
-        OHLCV.Volume,
-    }
+    @responses.activate
+    def test_price_data(
+        self, av_data_provider, api_url_mock, api_response_json, ticker
+    ):
+        responses.add(
+            responses.GET,
+            url=api_url_mock,
+            json=api_response_json,
+            status=200,
+            content_type="json",
+        )
 
-    pdt.assert_series_equal(
-        left=df.loc["2024-08-30"],
-        right=pd.Series(
+        df = av_data_provider.get_prices(ticker, output_size="full")
+
+        assert df.shape == (2, 5)
+        assert isinstance(df.index, pd.DatetimeIndex)
+        assert set(df.columns) == set(OHLCV)
+
+        expected_series = pd.Series(
             {
                 OHLCV.Open: 199.1100,
                 OHLCV.High: 202.1700,
@@ -94,28 +125,26 @@ def test_retrieve_price_data(data_provider, av_price_mock_url, ticker):
                 OHLCV.Close: 202.1300,
                 OHLCV.Volume: 4750999,
             }
-        ),
-        check_names=False,
-    )
+        )
+
+        pdt.assert_series_equal(
+            df.loc["2024-08-30"], expected_series, check_names=False
+        )
 
 
-@pytest.fixture
-def av_dividend_mock_url(av_base_api_url, api_key, ticker):
-    params = {
-        "symbol": ticker,
-        "apikey": api_key,
-        "function": "DIVIDENDS",
-    }
-    encoded_query_params = urllib.parse.urlencode(params)
-    return f"{av_base_api_url}{encoded_query_params}"
+class TestDividendData:
+    @pytest.fixture
+    def api_url_mock(self, av_base_api_url, api_key, ticker):
+        params = {
+            "symbol": ticker,
+            "apikey": api_key,
+            "function": "DIVIDENDS",
+        }
+        return "".join([av_base_api_url, urllib.parse.urlencode(params)])
 
-
-@responses.activate
-def test_retrieve_dividend_data(data_provider, av_dividend_mock_url, ticker):
-    responses.add(
-        responses.GET,
-        url=av_dividend_mock_url,
-        json={
+    @pytest.fixture
+    def api_response_json(self, ticker):
+        return {
             "symbol": ticker,
             "data": [
                 {
@@ -133,18 +162,30 @@ def test_retrieve_dividend_data(data_provider, av_dividend_mock_url, ticker):
                     "amount": "1.71",
                 },
             ],
-        },
-        status=200,
-        content_type="application/json",
-    )
-
-    expected = pd.DataFrame(
-        data={
-            Fields.Dividends: [1.67, 1.71],
-            Fields.Date: [pd.to_datetime(x) for x in ["2024-08-09", "2024-05-09"]],
         }
-    ).set_index(Fields.Date)
 
-    actual = data_provider.get_dividends(ticker)
+    @responses.activate
+    def test_dividend_data(
+        self, av_data_provider, api_url_mock, api_response_json, ticker
+    ):
+        responses.add(
+            responses.GET,
+            url=api_url_mock,
+            json=api_response_json,
+            status=200,
+            content_type="application/json",
+        )
 
-    pdt.assert_frame_equal(actual, expected)
+        df = av_data_provider.get_dividends(ticker)
+
+        assert df.shape == (2, 1)
+        assert isinstance(df.index, pd.DatetimeIndex)
+
+        expected_df = pd.DataFrame(
+            data={
+                Fields.Dividends: [1.67, 1.71],
+                Fields.Date: [pd.to_datetime(x) for x in ["2024-08-09", "2024-05-09"]],
+            }
+        ).set_index(Fields.Date)
+
+        pdt.assert_frame_equal(df, expected_df)

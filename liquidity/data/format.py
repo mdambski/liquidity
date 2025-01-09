@@ -2,8 +2,6 @@ from typing import Callable
 
 import pandas as pd
 
-from liquidity.data.metadata.fields import OHLCV, Fields
-
 
 def formatter_factory(
     cols_mapper: dict = None,
@@ -23,12 +21,3 @@ def formatter_factory(
         return df[cols_out] if cols_out else df
 
     return format_func
-
-
-def format_as_yield(price_df: pd.DataFrame):
-    yields_df = price_df.ffill()
-    format_func = formatter_factory(
-        cols_mapper={OHLCV.Close: Fields.Yield},
-        cols_out=[Fields.Yield],
-    )
-    return format_func(yields_df)

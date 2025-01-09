@@ -3,9 +3,10 @@ import os
 import pandas as pd
 
 from pathlib import Path
+
+from data.metadata.fields import Fields, OHLCV
 from liquidity.data.providers.base import DataProviderBase
 from liquidity.exceptions import DataNotAvailable
-from liquidity.data.metadata.fields import OHLCV, Fields
 from liquidity.data.format import formatter_factory
 
 
@@ -29,10 +30,15 @@ class LocalStorageDataProvider(DataProviderBase):
 
     def get_prices(self, ticker: str) -> pd.DataFrame:
         file_path = os.path.join(self.data_dir, ticker, "price.csv")
-        formatter_func = formatter_factory(index_col=DATE, cols_out=[CLOSE])
+        formatter_func = formatter_factory(
+            index_col=Fields.Date, cols_out=[OHLCV.Close]
+        )
         return formatter_func(self._load(file_path))
 
     def get_dividends(self, ticker: str) -> pd.DataFrame:
         df = self._load(os.path.join(self.data_dir, ticker, "dividend.csv"))
-        format_func = formatter_factory(index_col=DATE)
+        format_func = formatter_factory(index_col=Fields.Date)
         return format_func(df)
+
+    def get_treasury_yield(self, maturity: str) -> pd.DataFrame:
+        raise NotImplementedError

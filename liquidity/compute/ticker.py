@@ -7,17 +7,8 @@ import pandas as pd
 
 from liquidity.compute.utils import dividends, yields
 from liquidity.data.config import get_data_provider
-from liquidity.data.format import format_as_yield
-from liquidity.data.metadata.assets import get_asset_catalog, get_ticker_metadata
-from liquidity.data.metadata.entities import AssetMetadata, AssetTypes
+from liquidity.data.metadata.assets import get_ticker_metadata
 
-from liquidity.exceptions import DataNotAvailable
-
-from liquidity.data.providers.base import DataProviderBase
-from liquidity.data.providers.alpha_vantage import AlphaVantageDataProvider
-from liquidity.data.providers.local import LocalStorageDataProvider
-from liquidity.compute.utils.dividends import compute_ttm_dividend
-from liquidity.compute.utils.yields import compute_dividend_yield
 
 logger = logging.getLogger(__name__)
 
@@ -85,9 +76,18 @@ class Ticker:
         key = self.get_key("yields")
         if key not in self.cache:
             if self.metadata.is_yield:
-                self.cache[key] = format_as_yield(self.prices)
+                self.cache[key] = self.provider.get_treasury_yield(
+                    self.metadata.maturity
+                )
             else:
                 self.cache[key] = yields.compute_dividend_yield(
                     self.prices, self.dividends
                 )
+        return self.cache[key]
+
+    @property
+    def treasury_yield(self) -> pd.DataFrame:
+        key = self.get_key("treasury_yield")
+        if key not in self.cache:
+            self.cache[key] = self.provider.get_treasury_yield()
         return self.cache[key]

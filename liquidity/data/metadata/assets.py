@@ -25,11 +25,12 @@ ALL_ASSETS = {
         distributing=True,
         distribution_frequency=12,
     ),
-    "TNX": AssetMetadata(
-        ticker="TNX",
-        name="Interest Rate On 10-Year Note",
-        type=AssetTypes.Index,
+    "UST_10Y": AssetMetadata(
+        ticker="UST_10Y",
+        name="Interest Rate On 10-Year US Treasury",
+        type=AssetTypes.Treasury,
         subtype="Yield",
+        maturity="10year",
     ),
     "SPX": AssetMetadata(
         ticker="SPX", name="S&P 500", type=AssetTypes.Index, subtype="Stocks"

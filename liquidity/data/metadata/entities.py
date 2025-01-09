@@ -9,6 +9,7 @@ class AssetTypes(str, Enum):
     ETF = "ETF"
     Index = "Index"
     Crypto = "Crypto"
+    Treasury = "Treasury"
 
 
 @dataclass
@@ -17,6 +18,7 @@ class AssetMetadata:
     name: str
     type: AssetTypes
     subtype: str
+    maturity: Optional[str] = None
     currency: Optional[str] = None
     start_date: Optional[datetime.date] = None
     distributing: bool = False
@@ -25,4 +27,4 @@ class AssetMetadata:
     @property
     def is_yield(self) -> bool:
         """Returns if asset price represents yield."""
-        return self.type == AssetTypes.Index and self.subtype == "Yield"
+        return self.type == AssetTypes.Treasury and self.subtype == "Yield"

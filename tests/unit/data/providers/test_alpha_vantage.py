@@ -22,7 +22,7 @@ def config_env(config):
 
 
 def test_envvars_set_config_values(config_env, config):
-    assert config.dict() == config_env.dict()
+    assert config.model_dump() == config_env.model_dump()
 
 
 def test_apikey_empty_by_default():
