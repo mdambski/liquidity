@@ -3,6 +3,8 @@ import os
 from os.path import expanduser
 
 import pandas as pd
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 from liquidity.compute.utils import dividends, yields
 from liquidity.data.config import get_data_provider
@@ -11,8 +13,11 @@ from liquidity.data.metadata.assets import get_ticker_metadata
 logger = logging.getLogger(__name__)
 
 
-CACHE_DIR = os.path.join(expanduser("~"), ".liquidity")
-CACHE_DATA_DIR = os.path.join(CACHE_DIR, "data")
+class CacheConfig(BaseSettings):
+    """Configuration settings for Alpha Vantage API."""
+
+    enabled: bool = Field(default=True, alias="CACHE_ENABLED")
+    data_dir: str = Field(default=os.path.join(expanduser("~"), ".liquidity", "data"), alias="CACHE_DATA_DIR")
 
 
 class InMemoryCacheWithPersistence(dict):
@@ -22,7 +27,7 @@ class InMemoryCacheWithPersistence(dict):
     data between executions. This can lower number of api calls.
     """
 
-    def __init__(self, cache_dir: str = CACHE_DATA_DIR):
+    def __init__(self, cache_dir: str):
         super().__init__()
         self.cache_dir = cache_dir
         self.ensure_cache_dir()
@@ -48,7 +53,13 @@ class Ticker:
         self.name = name
         self.metadata = get_ticker_metadata(name)
         self.provider = get_data_provider(name)
-        self.cache = InMemoryCacheWithPersistence()
+        self.cache = self.initialize_cache()
+
+    def initialize_cache(self):
+        config = CacheConfig()
+        if config.enabled:
+            return InMemoryCacheWithPersistence(config.data_dir)
+        return {}
 
     def get_key(self, data_type: str) -> str:
         """Returns key for the cache storage and retrieval."""
