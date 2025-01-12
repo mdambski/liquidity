@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 import pandas as pd
-from data.metadata.fields import OHLCV, Fields
+from liquidity.data.metadata.fields import OHLCV, Fields
 
 from liquidity.data.format import formatter_factory
 from liquidity.data.providers.base import DataProviderBase
