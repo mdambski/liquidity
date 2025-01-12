@@ -4,7 +4,7 @@ delint:
 	poetry run ruff format .
 
 .PHONY: lint
-delint:
+lint:
 	poetry run ruff check
 	poetry run ruff format . --check
 
