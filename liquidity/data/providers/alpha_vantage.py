@@ -79,7 +79,7 @@ class AlphaVantageDataProvider(DataProviderBase):
         )
         return av_dividend_formatter(df)
 
-    def get_treasury_yield(self, maturity: str = '10year') -> pd.DataFrame:
+    def get_treasury_yield(self, maturity: str = "10year") -> pd.DataFrame:
         """
         Fetches treasury yield data for a specified maturity period.
 

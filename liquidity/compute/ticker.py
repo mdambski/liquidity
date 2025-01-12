@@ -66,7 +66,9 @@ class Ticker:
         key = self.get_key("dividends")
         if key not in self.cache:
             df = self.provider.get_dividends(self.name)
-            self.cache[key] = dividends.compute_ttm_dividend(df)
+            self.cache[key] = dividends.compute_ttm_dividend(
+                df, self.metadata.distribution_frequency
+            )
         return self.cache[key]
 
     @property
@@ -81,11 +83,4 @@ class Ticker:
                 self.cache[key] = yields.compute_dividend_yield(
                     self.prices, self.dividends
                 )
-        return self.cache[key]
-
-    @property
-    def treasury_yield(self) -> pd.DataFrame:
-        key = self.get_key("treasury_yield")
-        if key not in self.cache:
-            self.cache[key] = self.provider.get_treasury_yield()
         return self.cache[key]

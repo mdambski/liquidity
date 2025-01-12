@@ -10,11 +10,15 @@ class YieldSpread:
         self.benchmark = Ticker(ticker_benchmark)
 
     def get_yields(self):
-        yields = self.ticker.yields.join(
-            self.benchmark.yields,
-            on="date",
-            lsuffix=self.ticker.name,
-            rsuffix=self.benchmark.name,
+        yields = (
+            self.ticker.yields.join(
+                self.benchmark.yields,
+                on=Fields.Date,
+                lsuffix=self.ticker.name,
+                rsuffix=self.benchmark.name,
+            )
+            .ffill()
+            .dropna()
         )
 
         t_yield = f"{Fields.Yield}{self.ticker.name}"
@@ -36,4 +40,4 @@ class YieldSpread:
 
 
 if __name__ == "__main__":
-    YieldSpread("HYG", "LQD").show()
+    YieldSpread("HYG", "UST_10Y").show()
