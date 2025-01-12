@@ -3,6 +3,11 @@ delint:
 	poetry run ruff check --fix-only
 	poetry run ruff format .
 
+.PHONY: lint
+delint:
+	poetry run ruff check
+	poetry run ruff format . --check
+
 .PHONY: mypy
 mypy:
 	poetry run mypy .

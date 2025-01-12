@@ -1,0 +1,18 @@
+repos:
+    # repository containing hooks
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+    -   id: end-of-file-fixer # ensures that a file is either empty, or ends with one newline.
+    -   id: fix-byte-order-marker # removes utf-8 byte order marker.
+    -   id: mixed-line-ending # replaces or checks mixed line ending.
+    -   id: trailing-whitespace # trims trailing whitespace.
+    -   id: check-yaml # checks yaml files for parseable syntax.
+
+-   repo: local
+    hooks:
+      -   id: run-checks
+          name: Run checks
+          entry: make lint
+          language: system  # execute in the system shell
+          types: [python]  # trigger for python files
