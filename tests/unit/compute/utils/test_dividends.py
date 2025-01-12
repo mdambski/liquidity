@@ -33,9 +33,20 @@ def q_div_with_special():
     return df.set_index(pd.to_datetime(df[Fields.Date]))
 
 
-def test_reqular_dividends(q_div_with_special):
+def test_regular_dividends(q_div_with_special):
     expected = q_div_with_special[[TTM_DIVIDEND_EXPECTED]]
     actual = compute_ttm_dividend(df=q_div_with_special, partial_window=True)
+
+    npt.assert_almost_equal(
+        actual=actual[Fields.TTM_Dividend].values,
+        desired=expected[TTM_DIVIDEND_EXPECTED].values,
+        decimal=4,
+    )
+
+
+def test_regular_dividends_partial_false(q_div_with_special):
+    expected = q_div_with_special[q_div_with_special["is_full_year"]==True][[TTM_DIVIDEND_EXPECTED]]
+    actual = compute_ttm_dividend(df=q_div_with_special, dividend_frequency=4)
 
     npt.assert_almost_equal(
         actual=actual[Fields.TTM_Dividend].values,

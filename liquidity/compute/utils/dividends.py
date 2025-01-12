@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Optional
 
 import pandas as pd
 
@@ -6,7 +7,9 @@ from liquidity.data.metadata.fields import Fields
 
 
 def compute_ttm_dividend(
-    df: pd.DataFrame, dividend_frequency: int, partial_window: bool = False
+    df: pd.DataFrame,
+    dividend_frequency: Optional[int] = None,
+    partial_window: bool = False,
 ) -> pd.DataFrame:
     """Return dividends dataframe with computed TTM Dividend column.
 
@@ -24,7 +27,9 @@ def compute_ttm_dividend(
         representative of the entire year.
     """
     df[Fields.TTM_Dividend] = (
-        df[Fields.Dividends].rolling("365D", min_periods=dividend_frequency).sum()
+        df[Fields.Dividends]
+        .rolling("365D", min_periods=None if partial_window else dividend_frequency)
+        .sum()
     )
 
     if not partial_window:
