@@ -23,8 +23,6 @@ class AlphaVantageConfig(BaseSettings):
 class AlphaVantageDataProvider(DataProviderBase):
     """Data provider class to fetch financial data from Alpha Vantage API."""
 
-    name = "av"
-
     def __init__(self, api_key: str = None) -> None:
         self.api_key = api_key or AlphaVantageConfig().api_key
         self.output_format = "pandas"

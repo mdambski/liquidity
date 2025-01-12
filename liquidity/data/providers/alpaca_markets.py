@@ -7,9 +7,10 @@ from dateutil.relativedelta import relativedelta
 
 from liquidity.data.format import formatter_factory
 from liquidity.data.metadata.fields import OHLCV
+from liquidity.data.providers.base import DataProviderBase
 
 
-class AlpacaCryptoDataProvider:
+class AlpacaCryptoDataProvider(DataProviderBase):
     """
     A data provider class to fetch and format cryptocurrency price data
     using Alpaca's CryptoHistoricalDataClient.
@@ -82,3 +83,9 @@ class AlpacaCryptoDataProvider:
             cols_out=OHLCV.all_values(),
         )
         return alpaca_formatter(df)
+
+    def get_dividends(self, ticker: str) -> pd.DataFrame:
+        raise RuntimeError("Not available for Crypto")
+
+    def get_treasury_yield(self, maturity: str) -> pd.DataFrame:
+        raise RuntimeError("Not available for Crypto")
