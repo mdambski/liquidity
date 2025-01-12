@@ -1,16 +1,15 @@
 import json
+import urllib.parse
 
 import pandas as pd
 import pytest
-import urllib.parse
-from liquidity.data.metadata.fields import OHLCV, Fields
 import responses
 from pandas import testing as pdt
 
 
 class TestTreasuryYieldData:
     @pytest.fixture
-    def api_url_mock(self, av_base_api_url, api_key):
+    def api_url(self, av_base_api_url, api_key):
         params = {
             "apikey": api_key,
             "interval": "monthly",
@@ -18,7 +17,7 @@ class TestTreasuryYieldData:
             "datatype": "json",
             "function": "TREASURY_YIELD",
         }
-        return "".join([av_base_api_url, urllib.parse.urlencode(params)])
+        return "?".join([av_base_api_url, urllib.parse.urlencode(params)])
 
     @pytest.fixture
     def api_response_json(self, treasury_yield_fixture_path):
@@ -27,12 +26,10 @@ class TestTreasuryYieldData:
         return data
 
     @responses.activate
-    def test_treasury_yield_data(
-        self, av_data_provider, api_url_mock, api_response_json
-    ):
+    def test_treasury_yield_data(self, av_data_provider, api_url, api_response_json):
         responses.add(
             responses.GET,
-            url=api_url_mock,
+            url=api_url,
             json=api_response_json,
             status=200,
             content_type="json",
@@ -41,7 +38,7 @@ class TestTreasuryYieldData:
         df = av_data_provider.get_treasury_yield(maturity="10year")
 
         assert df.shape == (24, 1)
-        assert set(df.columns) == {Fields.Yield}
+        assert set(df.columns) == {"Yield"}
         assert isinstance(df.index, pd.DatetimeIndex)
 
         # check if selected fields match and have correct format
@@ -49,19 +46,17 @@ class TestTreasuryYieldData:
             df.loc[["2024-12-01", "2023-01-01"]],
             pd.DataFrame(
                 data={
-                    Fields.Yield: [4.39, 3.53],
-                    Fields.Date: [
-                        pd.to_datetime(x) for x in ["2024-12-01", "2023-01-01"]
-                    ],
+                    "Yield": [4.39, 3.53],
+                    "Date": [pd.to_datetime(x) for x in ["2024-12-01", "2023-01-01"]],
                 }
-            ).set_index(Fields.Date),
+            ).set_index("Date"),
             check_names=False,
         )
 
 
 class TestPriceData:
     @pytest.fixture
-    def api_url_mock(self, av_base_api_url, api_key, ticker):
+    def api_url(self, av_base_api_url, api_key, ticker):
         params = {
             "symbol": ticker,
             "apikey": api_key,
@@ -69,7 +64,7 @@ class TestPriceData:
             "outputsize": "full",
             "function": "TIME_SERIES_DAILY",
         }
-        return "".join([av_base_api_url, urllib.parse.urlencode(params)])
+        return "?".join([av_base_api_url, urllib.parse.urlencode(params)])
 
     @pytest.fixture
     def api_response_json(self, ticker):
@@ -100,12 +95,10 @@ class TestPriceData:
         }
 
     @responses.activate
-    def test_price_data(
-        self, av_data_provider, api_url_mock, api_response_json, ticker
-    ):
+    def test_price_data(self, av_data_provider, api_url, api_response_json, ticker):
         responses.add(
             responses.GET,
-            url=api_url_mock,
+            url=api_url,
             json=api_response_json,
             status=200,
             content_type="json",
@@ -115,15 +108,15 @@ class TestPriceData:
 
         assert df.shape == (2, 5)
         assert isinstance(df.index, pd.DatetimeIndex)
-        assert set(df.columns) == set(OHLCV)
+        assert set(df.columns) == {"Open", "Close", "Low", "High", "Volume"}
 
         expected_series = pd.Series(
             {
-                OHLCV.Open: 199.1100,
-                OHLCV.High: 202.1700,
-                OHLCV.Low: 198.7300,
-                OHLCV.Close: 202.1300,
-                OHLCV.Volume: 4750999,
+                "Open": 199.1100,
+                "High": 202.1700,
+                "Low": 198.7300,
+                "Close": 202.1300,
+                "Volume": 4750999,
             }
         )
 
@@ -134,13 +127,13 @@ class TestPriceData:
 
 class TestDividendData:
     @pytest.fixture
-    def api_url_mock(self, av_base_api_url, api_key, ticker):
+    def api_url(self, av_base_api_url, api_key, ticker):
         params = {
             "symbol": ticker,
             "apikey": api_key,
             "function": "DIVIDENDS",
         }
-        return "".join([av_base_api_url, urllib.parse.urlencode(params)])
+        return "?".join([av_base_api_url, urllib.parse.urlencode(params)])
 
     @pytest.fixture
     def api_response_json(self, ticker):
@@ -165,12 +158,10 @@ class TestDividendData:
         }
 
     @responses.activate
-    def test_dividend_data(
-        self, av_data_provider, api_url_mock, api_response_json, ticker
-    ):
+    def test_dividend_data(self, av_data_provider, api_url, api_response_json, ticker):
         responses.add(
             responses.GET,
-            url=api_url_mock,
+            url=api_url,
             json=api_response_json,
             status=200,
             content_type="application/json",
@@ -182,10 +173,10 @@ class TestDividendData:
         assert isinstance(df.index, pd.DatetimeIndex)
 
         expected_df = pd.DataFrame(
-            data={
-                Fields.Dividends: [1.67, 1.71],
-                Fields.Date: [pd.to_datetime(x) for x in ["2024-08-09", "2024-05-09"]],
-            }
-        ).set_index(Fields.Date)
+            data={"Dividends": [1.67, 1.71]},
+            index=pd.DatetimeIndex(
+                data=pd.to_datetime(["2024-08-09", "2024-05-09"]), name="Date"
+            ),
+        )
 
         pdt.assert_frame_equal(df, expected_df)

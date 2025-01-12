@@ -3,17 +3,15 @@ from __future__ import annotations
 from typing import Optional
 
 import pandas as pd
-from alpha_vantage.fundamentaldata import FundamentalData
 from alpha_vantage.econindicators import EconIndicators
-
+from alpha_vantage.fundamentaldata import FundamentalData
+from alpha_vantage.timeseries import TimeSeries
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
-from alpha_vantage.timeseries import TimeSeries
-
+from liquidity.data.format import formatter_factory
 from liquidity.data.metadata.fields import OHLCV, Fields
 from liquidity.data.providers.base import DataProviderBase
-from liquidity.data.format import formatter_factory
 
 
 class AlphaVantageConfig(BaseSettings):
@@ -32,11 +30,11 @@ class AlphaVantageDataProvider(DataProviderBase):
         df, _ = client.get_daily(ticker, outputsize=output_size)
         av_prices_formatter = formatter_factory(
             cols_mapper={
-                "1. open": OHLCV.Open,
-                "2. high": OHLCV.High,
-                "3. low": OHLCV.Low,
-                "4. close": OHLCV.Close,
-                "5. volume": OHLCV.Volume,
+                "1. open": OHLCV.Open.value,
+                "2. high": OHLCV.High.value,
+                "3. low": OHLCV.Low.value,
+                "4. close": OHLCV.Close.value,
+                "5. volume": OHLCV.Volume.value,
             },
         )
         return av_prices_formatter(df)

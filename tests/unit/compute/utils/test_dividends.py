@@ -5,7 +5,6 @@ import pytest
 from liquidity.compute.utils.dividends import compute_ttm_dividend
 from liquidity.data.metadata.fields import Fields
 
-
 TTM_DIVIDEND_EXPECTED = f"{Fields.TTM_Dividend}_expected"
 IS_FULL_WINDOW = "IS_FULL_WINDOW"
 

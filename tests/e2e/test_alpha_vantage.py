@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
 
-from liquidity.data.providers.alpha_vantage import AlphaVantageDataProvider
 from liquidity.data.metadata.fields import OHLCV, Fields
+from liquidity.data.providers.alpha_vantage import AlphaVantageDataProvider
 
 
 @pytest.fixture

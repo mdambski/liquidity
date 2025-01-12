@@ -1,6 +1,6 @@
 import pandas as pd
 
-from liquidity.data.metadata.fields import Fields, OHLCV
+from liquidity.data.metadata.fields import OHLCV, Fields
 
 
 def compute_dividend_yield(

@@ -21,4 +21,7 @@ class OHLCV(StrEnum):
     Low = "Low"
     Close = "Close"
     Volume = "Volume"
-    Price = Close
+
+    @classmethod
+    def all_values(cls):
+        return [x.value for x in list(cls)]

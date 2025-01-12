@@ -1,14 +1,12 @@
 import os
-
-import pandas as pd
-
 from pathlib import Path
 
-from data.metadata.fields import Fields, OHLCV
+import pandas as pd
+from data.metadata.fields import OHLCV, Fields
+
+from liquidity.data.format import formatter_factory
 from liquidity.data.providers.base import DataProviderBase
 from liquidity.exceptions import DataNotAvailable
-from liquidity.data.format import formatter_factory
-
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 

@@ -2,6 +2,7 @@ import os
 from unittest.mock import patch
 
 import pytest
+
 from liquidity.data.providers.alpha_vantage import (
     AlphaVantageConfig,
     AlphaVantageDataProvider,

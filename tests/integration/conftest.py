@@ -17,7 +17,7 @@ def ticker():
 
 @pytest.fixture
 def av_base_api_url(api_key, ticker):
-    return "https://www.alphavantage.co/query?"
+    return "https://www.alphavantage.co/query"
 
 
 @pytest.fixture

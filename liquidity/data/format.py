@@ -2,6 +2,8 @@ from typing import Callable
 
 import pandas as pd
 
+from liquidity.data.metadata.fields import Fields
+
 
 def formatter_factory(
     cols_mapper: dict = None,
@@ -18,6 +20,9 @@ def formatter_factory(
             df = df.set_index(pd.to_datetime(df[index_col]))
         if to_numeric:
             df[to_numeric] = df[to_numeric].apply(pd.to_numeric)
+
+        df.index.name = Fields.Date.value
+
         return df[cols_out] if cols_out else df
 
     return format_func

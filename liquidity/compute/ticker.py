@@ -1,6 +1,5 @@
-import os
-
 import logging
+import os
 from os.path import expanduser
 
 import pandas as pd
@@ -8,7 +7,6 @@ import pandas as pd
 from liquidity.compute.utils import dividends, yields
 from liquidity.data.config import get_data_provider
 from liquidity.data.metadata.assets import get_ticker_metadata
-
 
 logger = logging.getLogger(__name__)
 

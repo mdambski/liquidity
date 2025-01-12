@@ -1,8 +1,7 @@
-import datetime
+from datetime import datetime
 from typing import Optional
 
-from liquidity.data.metadata.entities import AssetTypes, AssetMetadata
-
+from liquidity.data.metadata.entities import AssetMetadata, AssetTypes
 
 ALL_ASSETS = {
     "HYG": AssetMetadata(
@@ -11,7 +10,7 @@ ALL_ASSETS = {
         type=AssetTypes.ETF,
         subtype="Bonds",
         currency="USD",
-        start_date=datetime.date(2007, 4, 4),
+        start_date=datetime(2007, 4, 4),
         distributing=True,
         distribution_frequency=12,
     ),
@@ -21,7 +20,7 @@ ALL_ASSETS = {
         type=AssetTypes.ETF,
         subtype="Bonds",
         currency="USD",
-        start_date=datetime.date(2002, 7, 22),
+        start_date=datetime(2002, 7, 22),
         distributing=True,
         distribution_frequency=12,
     ),
