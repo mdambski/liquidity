@@ -30,8 +30,10 @@ class AlpacaCryptoDataProvider(DataProviderBase):
 
         Args:
             ticker (str): The cryptocurrency ticker (e.g., "BTC/USD").
-            start (Optional[datetime]): The start date for the data. Defaults to one year ago.
-            end (Optional[datetime]): The end date for the data. Defaults to None (up to the latest available data).
+            start (Optional[datetime]): The start date for the data.
+                Defaults to one year ago.
+            end (Optional[datetime]): The end date for the data.
+                Defaults to None (up to the latest available data).
 
         Returns:
             pd.DataFrame: A DataFrame containing the formatted price data, with the

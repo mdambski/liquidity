@@ -1,4 +1,4 @@
-from matplotlib import pyplot as plt
+import plotly.graph_objects as go
 
 from liquidity.compute.ticker import Ticker
 from liquidity.data.metadata.fields import Fields
@@ -10,10 +10,13 @@ class YieldSpread:
         self.benchmark = Ticker(ticker_benchmark)
 
     def get_yields(self):
+        ticker = self.ticker.yields.dropna().set_index("Date")
+        benchmark = self.benchmark.yields.dropna().set_index("Date")
+
         yields = (
-            self.ticker.yields.join(
-                self.benchmark.yields,
-                on=Fields.Date,
+            ticker.join(
+                benchmark,
+                on=Fields.Date.value,
                 lsuffix=self.ticker.name,
                 rsuffix=self.benchmark.name,
             )
@@ -32,12 +35,43 @@ class YieldSpread:
 
     def show(self):
         yields = self.get_yields()
-        yields[[Fields.Spread]].plot(
-            figsize=(10, 6),
-            title=f"{self.ticker.name} - {self.benchmark.name} Yield spread",
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=yields.index,
+                y=yields[Fields.Spread],
+                mode="lines",
+                name="Yield Spread",
+                line=dict(color="cadetblue", width=2, dash="solid"),
+            )
         )
-        plt.show()
+
+        # Set chart title and layout
+        fig.update_layout(
+            title=f"{self.ticker.name} - {self.benchmark.name} Yield Spread",
+            title_font=dict(size=20, family="Arial, sans-serif", color="black"),
+            xaxis_title="Date",
+            yaxis_title="Difference in Percentage Points",
+            xaxis=dict(
+                showgrid=True,
+                zeroline=False,
+                tickformat="%b %d, %Y",
+                tickangle=45,
+                gridcolor="whitesmoke",
+            ),
+            yaxis=dict(
+                showgrid=True, zeroline=True, gridcolor="whitesmoke", tickformat=".2f"
+            ),
+            plot_bgcolor="white",  # Clean white background
+            paper_bgcolor="ghostwhite",  # Light gray paper background
+            hovermode="closest",  # Hover on nearest data point
+            font=dict(family="Arial, sans-serif", size=14, color="black"),
+        )
+
+        # Show the plot
+        fig.show()
 
 
 if __name__ == "__main__":
-    YieldSpread("HYG", "UST_10Y").show()
+    YieldSpread("HYG", "LQD").show()

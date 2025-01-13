@@ -17,7 +17,10 @@ class CacheConfig(BaseSettings):
     """Configuration settings for Alpha Vantage API."""
 
     enabled: bool = Field(default=True, alias="CACHE_ENABLED")
-    data_dir: str = Field(default=os.path.join(expanduser("~"), ".liquidity", "data"), alias="CACHE_DATA_DIR")
+    data_dir: str = Field(
+        default=os.path.join(expanduser("~"), ".liquidity", "data"),
+        alias="CACHE_DATA_DIR",
+    )
 
 
 class InMemoryCacheWithPersistence(dict):
@@ -68,14 +71,24 @@ class Ticker:
     @property
     def prices(self) -> pd.DataFrame:
         key = self.get_key("prices")
-        if key not in self.cache:
+        try:
+            # Attempt to retrieve the key from the cache.
+            # If it's not found in memory, the cache will
+            # attempt to load it from disk.
+            return self.cache[key]
+        except KeyError:
             self.cache[key] = self.provider.get_prices(self.name)
         return self.cache[key]
 
     @property
     def dividends(self) -> pd.DataFrame:
         key = self.get_key("dividends")
-        if key not in self.cache:
+        try:
+            # Attempt to retrieve the key from the cache.
+            # If it's not found in memory, the cache will
+            # attempt to load it from disk.
+            return self.cache[key]
+        except KeyError:
             df = self.provider.get_dividends(self.name)
             self.cache[key] = dividends.compute_ttm_dividend(
                 df, self.metadata.distribution_frequency
@@ -85,7 +98,12 @@ class Ticker:
     @property
     def yields(self) -> pd.DataFrame:
         key = self.get_key("yields")
-        if key not in self.cache:
+        try:
+            # Attempt to retrieve the key from the cache.
+            # If it's not found in memory, the cache will
+            # attempt to load it from disk.
+            return self.cache[key]
+        except KeyError:
             if self.metadata.is_yield:
                 self.cache[key] = self.provider.get_treasury_yield(
                     self.metadata.maturity

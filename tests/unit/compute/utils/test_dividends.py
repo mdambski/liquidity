@@ -10,7 +10,7 @@ IS_FULL_WINDOW = "IS_FULL_WINDOW"
 
 
 @pytest.fixture
-def q_div_with_special():
+def div_data():
     """Increasing quarterly dividend with on-off special distribution"""
     df = pd.DataFrame(
         data=[
@@ -33,9 +33,9 @@ def q_div_with_special():
     return df.set_index(pd.to_datetime(df[Fields.Date]))
 
 
-def test_regular_dividends(q_div_with_special):
-    expected = q_div_with_special[[TTM_DIVIDEND_EXPECTED]]
-    actual = compute_ttm_dividend(df=q_div_with_special, partial_window=True)
+def test_regular_dividends(div_data):
+    expected = div_data[[TTM_DIVIDEND_EXPECTED]]
+    actual = compute_ttm_dividend(df=div_data, partial_window=True)
 
     npt.assert_almost_equal(
         actual=actual[Fields.TTM_Dividend].values,
@@ -44,9 +44,9 @@ def test_regular_dividends(q_div_with_special):
     )
 
 
-def test_regular_dividends_partial_false(q_div_with_special):
-    expected = q_div_with_special[q_div_with_special["is_full_year"]==True][[TTM_DIVIDEND_EXPECTED]]
-    actual = compute_ttm_dividend(df=q_div_with_special, dividend_frequency=4)
+def test_regular_dividends_partial_false(div_data):
+    expected = div_data[div_data["is_full_year"]][[TTM_DIVIDEND_EXPECTED]]
+    actual = compute_ttm_dividend(df=div_data, dividend_frequency=4)
 
     npt.assert_almost_equal(
         actual=actual[Fields.TTM_Dividend].values,

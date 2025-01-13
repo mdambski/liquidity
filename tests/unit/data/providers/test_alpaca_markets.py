@@ -12,7 +12,9 @@ def mock_alpaca_client(sample_raw_data):
     with patch(
         "liquidity.data.providers.alpaca_markets.CryptoHistoricalDataClient"
     ) as mock_client:
-        mock_client.return_value.get_crypto_bars.return_value = MagicMock(df=sample_raw_data)
+        mock_client.return_value.get_crypto_bars.return_value = MagicMock(
+            df=sample_raw_data
+        )
 
         # Yield the mock client instance
         yield mock_client.return_value
