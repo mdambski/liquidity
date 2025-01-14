@@ -35,7 +35,9 @@ def div_data():
 
 def test_regular_dividends(div_data):
     expected = div_data[[TTM_DIVIDEND_EXPECTED]]
-    actual = compute_ttm_dividend(df=div_data, partial_window=True)
+    actual = compute_ttm_dividend(
+        df=div_data, dividend_frequency=4, partial_window=True
+    )
 
     npt.assert_almost_equal(
         actual=actual[Fields.TTM_Dividend].values,

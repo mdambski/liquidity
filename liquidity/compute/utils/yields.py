@@ -14,7 +14,7 @@ def compute_dividend_yield(
     df[Fields.TTM_Dividend] = df[Fields.TTM_Dividend].ffill()
 
     def yield_formula(row):
-        return (row[Fields.TTM_Dividend] / row[OHLCV.Close]) * 100.0
+        return ((row[Fields.TTM_Dividend] or 0.0) / row[OHLCV.Close]) * 100.0
 
     df[Fields.Yield] = df.apply(yield_formula, axis=1)
     return df[[Fields.Yield]]
