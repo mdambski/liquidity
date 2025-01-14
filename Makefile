@@ -14,11 +14,11 @@ mypy:
 
 .PHONY: test
 test:
-	poetry run pytest tests/ --cov=liquidity --ignore tests/e2e --tb=short
+	poetry run pytest tests/ --cov=liquidity --ignore tests/e2e
 
 .PHONY: test-e2e
 test-e2e:
-	poetry run pytest tests/e2e --tb=short
+	poetry run pytest tests/e2e
 
 .PHONY: install-deps
 install-deps:
