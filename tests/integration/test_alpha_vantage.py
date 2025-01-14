@@ -110,19 +110,20 @@ class TestPriceData:
         assert isinstance(df.index, pd.DatetimeIndex)
         assert set(df.columns) == {"Open", "Close", "Low", "High", "Volume"}
 
-        expected_series = pd.Series(
-            {
-                "Open": 199.1100,
-                "High": 202.1700,
-                "Low": 198.7300,
-                "Close": 202.1300,
-                "Volume": 4750999,
-            }
+        expected_df = pd.DataFrame(
+            data={
+                "Open": [199.3000, 199.1100],
+                "High": [201.1200, 202.1700],
+                "Low": [198.2700, 198.7300],
+                "Close": [198.9000, 202.1300],
+                "Volume": [2989594.0, 4750999.0],
+            },
+            index=pd.DatetimeIndex(
+                data=pd.to_datetime(["2024-08-29", "2024-08-30"]), name="Date"
+            ),
         )
 
-        pdt.assert_series_equal(
-            df.loc["2024-08-30"], expected_series, check_names=False
-        )
+        pdt.assert_frame_equal(df, expected_df)
 
 
 class TestDividendData:
@@ -173,9 +174,9 @@ class TestDividendData:
         assert isinstance(df.index, pd.DatetimeIndex)
 
         expected_df = pd.DataFrame(
-            data={"Dividends": [1.67, 1.71]},
+            data={"Dividends": [1.71, 1.67]},
             index=pd.DatetimeIndex(
-                data=pd.to_datetime(["2024-08-09", "2024-05-09"]), name="Date"
+                data=pd.to_datetime(["2024-05-09", "2024-08-09"]), name="Date"
             ),
         )
 

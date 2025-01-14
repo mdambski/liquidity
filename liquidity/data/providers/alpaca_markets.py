@@ -6,7 +6,7 @@ from alpaca.data import CryptoBarsRequest, CryptoHistoricalDataClient, TimeFrame
 from dateutil.relativedelta import relativedelta
 
 from liquidity.data.format import formatter_factory
-from liquidity.data.metadata.fields import OHLCV
+from liquidity.data.metadata.fields import OHLCV, Fields
 from liquidity.data.providers.base import DataProviderBase
 
 
@@ -81,6 +81,7 @@ class AlpacaCryptoDataProvider(DataProviderBase):
         """
         df.index = df.index.get_level_values("timestamp").tz_localize(None)
         alpaca_formatter = formatter_factory(
+            index_name=Fields.Date.value,
             cols_mapper={val.lower(): val for val in OHLCV.all_values()},
             cols_out=OHLCV.all_values(),
         )

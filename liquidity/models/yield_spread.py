@@ -10,8 +10,8 @@ class YieldSpread:
         self.benchmark = Ticker(ticker_benchmark)
 
     def get_yields(self):
-        ticker = self.ticker.yields.dropna().set_index("Date")
-        benchmark = self.benchmark.yields.dropna().set_index("Date")
+        ticker = self.ticker.yields.dropna()
+        benchmark = self.benchmark.yields.dropna()
 
         yields = (
             ticker.join(

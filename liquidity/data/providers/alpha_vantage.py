@@ -51,6 +51,7 @@ class AlphaVantageDataProvider(DataProviderBase):
                 "4. close": OHLCV.Close.value,
                 "5. volume": OHLCV.Volume.value,
             },
+            index_name=Fields.Date.value,
         )
         return av_prices_formatter(df)
 
