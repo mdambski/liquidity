@@ -26,6 +26,9 @@ def compute_ttm_dividend(
         year, but a part of the year. In such cases the TTM dividend yield will not be
         representative of the entire year.
     """
+    if not df.index.is_monotonic_increasing:
+        raise ValueError("Dates should be sorted in ascending order")
+
     df[Fields.TTM_Dividend] = (
         df[Fields.Dividends]
         .rolling("365D", min_periods=None if partial_window else dividend_frequency)

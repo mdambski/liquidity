@@ -55,3 +55,31 @@ def test_regular_dividends_partial_false(div_data):
         desired=expected[TTM_DIVIDEND_EXPECTED].values,
         decimal=4,
     )
+
+
+@pytest.fixture
+def unsorted_dates_data():
+    return pd.DataFrame(
+        {
+            Fields.Dividends: [0.5, 0.6, 0.7],
+        },
+        index=pd.to_datetime(["2025-02-01", "2025-01-01", "2025-03-01"]),
+    )
+
+
+@pytest.fixture
+def descending_dates_data():
+    return pd.DataFrame(
+        {
+            Fields.Dividends: [0.5, 0.6, 0.7],
+        },
+        index=pd.to_datetime(["2025-03-01", "2025-02-01", "2025-01-01"]),
+    )
+
+
+@pytest.mark.parametrize("data", ["unsorted_dates_data", "descending_dates_data"])
+def test_error_for_invalid_dates_order(request, data):
+    df = request.getfixturevalue(data)
+
+    with pytest.raises(ValueError, match="Dates should be sorted in ascending order"):
+        compute_ttm_dividend(df)
