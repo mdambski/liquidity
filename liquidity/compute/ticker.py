@@ -9,6 +9,7 @@ from pydantic_settings import BaseSettings
 from liquidity.compute.utils import dividends, yields
 from liquidity.data.config import get_data_provider
 from liquidity.data.metadata.assets import get_ticker_metadata
+from liquidity.data.metadata.fields import Fields
 
 logger = logging.getLogger(__name__)
 
@@ -45,10 +46,15 @@ class InMemoryCacheWithPersistence(dict):
 
     def __missing__(self, key):
         """Load data from disk if not in memory yet."""
-        file = os.path.join(self.cache_dir, f"{key}.csv")
-        if os.path.exists(file):
-            super().__setitem__(key, pd.read_csv(file))
-        return super().__getitem__(key)
+        file_path = os.path.join(self.cache_dir, f"{key}.csv")
+        if not os.path.exists(file_path):
+            raise KeyError(key)
+
+        idx_name = Fields.Date.value
+        value = pd.read_csv(file_path, index_col=idx_name, parse_dates=[idx_name])
+        super().__setitem__(key, value)
+
+        return value
 
 
 class Ticker:
