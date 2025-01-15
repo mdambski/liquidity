@@ -1,121 +1,87 @@
-import logging
-import os
-from os.path import expanduser
+from typing import Callable
 
 import pandas as pd
-from pydantic import Field
-from pydantic_settings import BaseSettings
 
-from liquidity.compute.utils import dividends, yields
+from liquidity.compute.cache import get_cache
+from liquidity.compute.utils.dividends import compute_ttm_dividend
+from liquidity.compute.utils.yields import compute_dividend_yield
 from liquidity.data.config import get_data_provider
 from liquidity.data.metadata.assets import get_ticker_metadata
-from liquidity.data.metadata.fields import Fields
-
-logger = logging.getLogger(__name__)
-
-
-class CacheConfig(BaseSettings):
-    """Configuration settings for Alpha Vantage API."""
-
-    enabled: bool = Field(default=True, alias="CACHE_ENABLED")
-    data_dir: str = Field(
-        default=os.path.join(expanduser("~"), ".liquidity", "data"),
-        alias="CACHE_DATA_DIR",
-    )
-
-
-class InMemoryCacheWithPersistence(dict):
-    """In-memory cache with file system persistence.
-
-    Holds data in-memory but saves it locally, in order to retrieve
-    data between executions. This can lower number of api calls.
-    """
-
-    def __init__(self, cache_dir: str):
-        super().__init__()
-        self.cache_dir = cache_dir
-        self.ensure_cache_dir()
-
-    def ensure_cache_dir(self):
-        if not os.path.exists(self.cache_dir):
-            os.makedirs(self.cache_dir)
-
-    def __setitem__(self, key, value):
-        super().__setitem__(key, value)
-        value.to_csv(os.path.join(self.cache_dir, f"{key}.csv"))
-
-    def __missing__(self, key):
-        """Load data from disk if not in memory yet."""
-        file_path = os.path.join(self.cache_dir, f"{key}.csv")
-        if not os.path.exists(file_path):
-            raise KeyError(key)
-
-        idx_name = Fields.Date.value
-        value = pd.read_csv(file_path, index_col=idx_name, parse_dates=[idx_name])
-        super().__setitem__(key, value)
-
-        return value
+from liquidity.data.metadata.entities import AssetMetadata
+from liquidity.data.providers.base import DataProviderBase
 
 
 class Ticker:
-    def __init__(self, name: str):
+    def __init__(
+        self,
+        name: str,
+        metadata: AssetMetadata,
+        provider: DataProviderBase,
+        cache: dict,
+    ):
+        """
+        Initialize a Ticker object.
+
+        Args:
+            name (str): The ticker symbol.
+            metadata (AssetMetadata): Metadata about the asset.
+            provider (DataProviderBase): Data provider for retrieving asset data.
+            cache (dict): Cache for storing and retrieving data.
+
+        Simpler Initialization:
+            Use the `Ticker.for_name(name: str)` class method for easier initialization:
+
+            Example:
+                ticker = Ticker.for_name("SPX")
+        """
         self.name = name
-        self.metadata = get_ticker_metadata(name)
-        self.provider = get_data_provider(name)
-        self.cache = self.initialize_cache()
+        self.metadata = metadata
+        self.provider = provider
+        self.cache = cache
 
-    def initialize_cache(self):
-        config = CacheConfig()
-        if config.enabled:
-            return InMemoryCacheWithPersistence(config.data_dir)
-        return {}
-
-    def get_key(self, data_type: str) -> str:
+    def _get_key(self, data_type: str) -> str:
         """Returns key for the cache storage and retrieval."""
         return f"{self.name}-{data_type}"
 
+    def _get(
+        self, cache_key: str, fetch_fn: Callable[[], pd.DataFrame]
+    ) -> pd.DataFrame:
+        """Retrieve data from cache or fetch using the provided function."""
+        try:
+            return self.cache[cache_key]
+        except KeyError:
+            self.cache[cache_key] = fetch_fn()
+            return self.cache[cache_key]
+
+    def _fetch_prices(self) -> pd.DataFrame:
+        return self.provider.get_prices(self.name)
+
+    def _fetch_yields(self) -> pd.DataFrame:
+        if self.metadata.is_treasury_yield:
+            return self.provider.get_treasury_yield(self.metadata.maturity)
+        return compute_dividend_yield(self.prices, self.dividends)
+
+    def _fetch_dividends(self) -> pd.DataFrame:
+        df = self.provider.get_dividends(self.name)
+        return compute_ttm_dividend(df, self.metadata.distribution_frequency)
+
     @property
     def prices(self) -> pd.DataFrame:
-        key = self.get_key("prices")
-        try:
-            # Attempt to retrieve the key from the cache.
-            # If it's not found in memory, the cache will
-            # attempt to load it from disk.
-            return self.cache[key]
-        except KeyError:
-            self.cache[key] = self.provider.get_prices(self.name)
-        return self.cache[key]
+        return self._get(self._get_key("prices"), self._fetch_prices)
 
     @property
     def dividends(self) -> pd.DataFrame:
-        key = self.get_key("dividends")
-        try:
-            # Attempt to retrieve the key from the cache.
-            # If it's not found in memory, the cache will
-            # attempt to load it from disk.
-            return self.cache[key]
-        except KeyError:
-            df = self.provider.get_dividends(self.name)
-            self.cache[key] = dividends.compute_ttm_dividend(
-                df, self.metadata.distribution_frequency
-            )
-        return self.cache[key]
+        return self._get(self._get_key("dividends"), self._fetch_dividends)
 
     @property
     def yields(self) -> pd.DataFrame:
-        key = self.get_key("yields")
-        try:
-            # Attempt to retrieve the key from the cache.
-            # If it's not found in memory, the cache will
-            # attempt to load it from disk.
-            return self.cache[key]
-        except KeyError:
-            if self.metadata.is_yield:
-                self.cache[key] = self.provider.get_treasury_yield(
-                    self.metadata.maturity
-                )
-            else:
-                self.cache[key] = yields.compute_dividend_yield(
-                    self.prices, self.dividends
-                )
-        return self.cache[key]
+        return self._get(self._get_key("yields"), self._fetch_yields)
+
+    @classmethod
+    def from_name(cls, name: str) -> "Ticker":
+        return cls(
+            name=name,
+            metadata=get_ticker_metadata(name),
+            provider=get_data_provider(name),
+            cache=get_cache(),
+        )

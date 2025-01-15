@@ -25,6 +25,6 @@ class AssetMetadata:
     distribution_frequency: int = 0
 
     @property
-    def is_yield(self) -> bool:
+    def is_treasury_yield(self) -> bool:
         """Returns if asset price represents yield."""
         return self.type == AssetTypes.Treasury and self.subtype == "Yield"

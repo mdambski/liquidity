@@ -5,9 +5,9 @@ from liquidity.data.metadata.fields import Fields
 
 
 class YieldSpread:
-    def __init__(self, ticker: str, ticker_benchmark: str = "TNX"):
-        self.ticker = Ticker(ticker)
-        self.benchmark = Ticker(ticker_benchmark)
+    def __init__(self, ticker: str, benchmark: str = "TNX"):
+        self.ticker = Ticker.from_name(ticker)
+        self.benchmark = Ticker.from_name(benchmark)
 
     def get_yields(self):
         ticker = self.ticker.yields.dropna()
@@ -16,7 +16,6 @@ class YieldSpread:
         yields = (
             ticker.join(
                 benchmark,
-                on=Fields.Date.value,
                 lsuffix=self.ticker.name,
                 rsuffix=self.benchmark.name,
             )
