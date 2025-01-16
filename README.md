@@ -18,10 +18,10 @@ Reflects liquidity preference and risk sentiment within the US stock market. Sho
 ### Bond Market ETF Yield Spreads
 Reflects funding stress in the broader market, with ample liquidity spreads tend to be tight, and widen when liquidity is drained and there is stress in the system.
 
-3**HYG / LQD Spread**:
+3. **HYG / LQD Spread**:
 Measures the risk premium between high-yield (HYG) and investment-grade bonds (LQD).
 
-4**LQD / TNX Spread**:
+4. **LQD / TNX Spread**:
 Measures the risk premium between investment-grade bonds (LQD) and 10-year Treasury yields (UST-10Y).
 
 
