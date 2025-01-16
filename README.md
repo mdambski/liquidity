@@ -11,13 +11,17 @@ This repository provides an overview of key market liquidity proxies and additio
 1. **Ethereum / Bitcoin (ETH / BTC)**:
 Reflects liquidity preference and risk sentiment within the cryptocurrency market. Barring idiosyncratic events it acts as a proxy for broader market liquidity.
 
+### Stock Market ETF Ratios
+2. **QQQ / SPY Ratio**:
+Reflects liquidity preference and risk sentiment within the US stock market. Shows performance of high beta QQQ (Nasdaq-100) vs SPY (S&P 500).
+
 ### Bond Market ETF Yield Spreads
 Reflects funding stress in the broader market, with ample liquidity spreads tend to be tight, and widen when liquidity is drained and there is stress in the system.
 
-2. **HYG / LQD Spread**:
+3**HYG / LQD Spread**:
 Measures the risk premium between high-yield (HYG) and investment-grade bonds (LQD).
 
-3. **LQD / TNX Spread**:
+4**LQD / TNX Spread**:
 Measures the risk premium between investment-grade bonds (LQD) and 10-year Treasury yields (UST-10Y).
 
 
