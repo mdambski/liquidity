@@ -40,8 +40,8 @@ class AlpacaCryptoDataProvider(DataProviderBase):
             index as timestamps and columns named after OHLCV fields.
         """
         df = self._get_raw_data(
-            ticker=ticker,
-            start=start or datetime.now() - relativedelta(years=1),
+            ticker=f"{ticker}/USD",
+            start=start or datetime.now() - relativedelta(years=5),
             end=end,
         )
         return self._format_dataframe(df)

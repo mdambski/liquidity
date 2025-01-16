@@ -12,7 +12,7 @@ class TestTreasuryYieldData:
     def api_url(self, av_base_api_url, api_key):
         params = {
             "apikey": api_key,
-            "interval": "monthly",
+            "interval": "weekly",
             "maturity": "10year",
             "datatype": "json",
             "function": "TREASURY_YIELD",

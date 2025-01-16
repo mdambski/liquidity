@@ -91,7 +91,7 @@ class AlphaVantageDataProvider(DataProviderBase):
             pd.DataFrame: A DataFrame containing the formatted treasury yield data.
         """
         client = EconIndicators(self.api_key, output_format="pandas")
-        df, _ = client.get_treasury_yield(maturity=maturity)
+        df, _ = client.get_treasury_yield(maturity=maturity, interval="weekly")
         av_treasury_yield_formatter = formatter_factory(
             cols_mapper={"date": Fields.Date.value, "value": Fields.Yield.value},
             index_col=Fields.Date.value,

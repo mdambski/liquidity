@@ -13,6 +13,7 @@ class Fields(StrEnum):
     TTM_Dividend = "TTM_Dividend"
     Yield = "Yield"
     Spread = "Spread"
+    Ratio = "Ratio"
 
 
 class OHLCV(StrEnum):

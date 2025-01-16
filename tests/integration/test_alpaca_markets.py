@@ -51,7 +51,7 @@ class TestAlpacaCryptoDataProvider:
     def api_url(self, ticker):
         url = "https://data.alpaca.markets/v1beta3/crypto/us/bars"
         params = CryptoBarsRequest(
-            symbol_or_symbols=ticker,
+            symbol_or_symbols=f"{ticker}/USD",
             timeframe=TimeFrame.Day,
             start=datetime(2024, 1, 1),
         )

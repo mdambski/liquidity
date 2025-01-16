@@ -8,36 +8,67 @@ This repository provides an overview of key market liquidity proxies and additio
 
 ### Crypto Proxies
 
-#### 1. **Bitcoin / Ethereum (BTC / ETH)**
-- Reflects liquidity preference and risk sentiment within the cryptocurrency market.
-  - **Higher ratio**: Risk-off sentiment (preference for Bitcoin).
-  - **Lower ratio**: Risk-on sentiment (preference for Ethereum).
+1. **Ethereum / Bitcoin (ETH / BTC)**:
+Reflects liquidity preference and risk sentiment within the cryptocurrency market. Barring idiosyncratic events it acts as a proxy for broader market liquidity.
 
-### Bond Market Proxies
+### Bond Market ETF Yield Spreads
+Reflects funding stress in the broader market, with ample liquidity spreads tend to be tight, and widen when liquidity is drained and there is stress in the system.
 
-#### 1. **HYG / LQD Spread**
-- Measures the risk premium between high-yield (HYG) and investment-grade bonds (LQD).
-  - **Widening spread**: Increased risk aversion.
-  - **Narrowing spread**: Improving liquidity and risk appetite.
+2. **HYG / LQD Spread**:
+Measures the risk premium between high-yield (HYG) and investment-grade bonds (LQD).
 
-#### 2. **HYG / TNX Spread**
-- Difference between high-yield corporate bonds (HYG) and 10-year Treasury yields (TNX).
-  - **Wider spread**: Higher perceived credit risk.
-  - **Narrower spread**: Lower risk premium.
+3. **LQD / TNX Spread**:
+Measures the risk premium between investment-grade bonds (LQD) and 10-year Treasury yields (UST-10Y).
 
-#### 3. **LQD / TNX Spread**
-- Compares investment-grade bonds (LQD) to 10-year Treasury yields (TNX).
-  - **Wider spread**: Risk aversion in the investment-grade market.
-  - **Narrower spread**: Favorable liquidity conditions.
 
----
+## Installation
+
+#### Step 1
+**Install Poetry (if not already installed):**
+You can install Poetry by following the instructions from their [official website](https://python-poetry.org/).
+For most systems, you can install it using this command:
+```bash
+curl -sSL https://install.python-poetry.org | python3 -
+```
+
+Alternatively, for Windows, you might use:
+```bash
+python -m pip install poetry
+```
+
+#### Step 2
+**Navigate to the Project Directory**: After downloading the project, open a terminal or command prompt, and navigate to the project directory:
+```bash
+git clone https://github.com/mdambski/liquidity.git
+cd liquidity
+```
+
+#### Step 3
+**Install the Dependencies**: Run the following command to install all the dependencies specified in pyproject.toml:
+```bash
+poetry install
+```
+
+#### Step 4
+**Retrieve API Key**: Go to the [Alphavantage.co](https://www.alphavantage.co/) website and retrieve free api-key.
+```bash
+export ALPHAVANTAGE_API_KEY="<your-api-key>"
+make run
+```
+
+This will generate summary of all liquidity proxies:
+Example chart displayed:
+![Liquidity proxies](liquidity/data/examples/liquidity-proxies.png)
+
 
 ## Data Sources
 
 This repository is based on market data APIs providing free access to data.
 
-- **Cryptocurrency Prices**:
-  - [Alpaca](https://alpaca.markets/)
+- **Cryptocurrency Prices**: [Alpaca.markets](https://alpaca.markets/)
+- **Other Market Data**: [Alphavantage.co](https://www.alphavantage.co/)
 
-- **Bond Market Data**:
-  - HYG, LQD, TNX, SPX, NDX: [Alphavantage](https://www.alphavantage.co/)
+
+## Future Improvements
+In the future I plan to add even more data providers and liquidity proxies.
+When there is enough features I will make a PyPI package to simplify installation.

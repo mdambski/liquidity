@@ -24,28 +24,40 @@ ALL_ASSETS = {
         distributing=True,
         distribution_frequency=12,
     ),
-    "UST_10Y": AssetMetadata(
-        ticker="UST_10Y",
+    "UST-10Y": AssetMetadata(
+        ticker="UST-10Y",
         name="Interest Rate On 10-Year US Treasury",
         type=AssetTypes.Treasury,
         subtype="Yield",
         maturity="10year",
     ),
-    "SPX": AssetMetadata(
-        ticker="SPX", name="S&P 500", type=AssetTypes.Index, subtype="Stocks"
+    "SPY": AssetMetadata(
+        ticker="SPY",
+        name="SPDR S&P 500 ETF Trust",
+        type=AssetTypes.ETF,
+        currency="USD",
+        subtype="Stocks",
+        distributing=True,
+        distribution_frequency=4,
     ),
-    "NDX": AssetMetadata(
-        ticker="NDX", name="Nasdaq-100", type=AssetTypes.Index, subtype="Stocks"
+    "QQQ": AssetMetadata(
+        ticker="QQQ",
+        name="Invesco QQQ Trust (Nasdaq-100)",
+        type=AssetTypes.ETF,
+        currency="USD",
+        subtype="Stocks",
+        distributing=True,
+        distribution_frequency=4,
     ),
     "BTC": AssetMetadata(
-        ticker="BTC/USD",
+        ticker="BTC",
         name="Bitcoin",
         currency="USD",
         type=AssetTypes.Crypto,
         subtype="Spot",
     ),
     "ETH": AssetMetadata(
-        ticker="ETH/USD",
+        ticker="ETH",
         name="Ethereum",
         currency="USD",
         type=AssetTypes.Crypto,
