@@ -13,10 +13,10 @@ Reflects liquidity preference and risk sentiment within the cryptocurrency marke
 
 ### Stock Market ETF Ratios
 2. **QQQ / SPY Ratio**:
-Reflects liquidity preference and risk sentiment within the US stock market. Shows performance of high beta QQQ (Nasdaq-100) vs SPY (S&P 500).
+Reflects liquidity preference and risk sentiment within the US stock market. Shows the performance of high-beta QQQ (Nasdaq-100) vs. SPY (S&P 500).
 
 ### Bond Market ETF Yield Spreads
-Reflects funding stress in the broader market, with ample liquidity spreads tend to be tight, and widen when liquidity is drained and there is stress in the system.
+Reflect funding stress in the broader market. When liquidity is ample, spreads tend to be tight, and they widen when liquidity is drained and stress builds in the system.
 
 3. **HYG / LQD Spread**:
 Measures the risk premium between high-yield (HYG) and investment-grade bonds (LQD).
