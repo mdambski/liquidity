@@ -1,18 +1,18 @@
 from functools import cached_property
 
-from liquidity.compute.chart import Chart
 from liquidity.compute.ticker import Ticker
 from liquidity.data.metadata.fields import Fields
+from liquidity.visuals.chart import Chart
 
 
 class PriceRatio:
     """
-    Computes and visualizes the price ratio between two financial instruments over time.
+    Computes and visualizes the price ratio between two financial instruments.
 
-    The price ratio represents the relative price relationship between a primary financial
-    instrument (`ticker`) and a benchmark (`benchmark`). This class provides functionality
-    to calculate the time series of prices, compute the price ratio, and visualize the results
-    using an interactive Plotly line chart.
+    The price ratio represents the relative price relationship between a primary
+    financial instrument (`ticker`) and a benchmark (`benchmark`). This class
+    provides functionality to calculate the time series of prices, compute the
+    price ratio, and visualize the results using an interactive Plotly line chart.
 
     Attributes:
     ----------
@@ -24,12 +24,12 @@ class PriceRatio:
     Methods:
     -------
     df:
-        Returns a pandas DataFrame containing the time series of prices for both instruments
-        and their computed price ratio.
+        Returns a pandas DataFrame containing the time series of prices for
+        both instruments and their computed price ratio.
 
     show():
-        Generates and displays an interactive Plotly chart to visualize the price ratio
-        over time.
+        Generates and displays an interactive Plotly chart to visualize
+        the price ratio over time.
 
     Examples:
     --------
@@ -64,8 +64,8 @@ class PriceRatio:
 
     @cached_property
     def df(self):
-        """Returns a pandas DataFrame containing the time series of prices for both instruments
-        and their computed ratio.
+        """Returns a pandas DataFrame containing the time series of prices
+        for both instruments and their computed ratio.
         """
         ticker = self.ticker.prices.dropna()
         benchmark = self.benchmark.prices.dropna()

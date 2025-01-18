@@ -1,18 +1,18 @@
 from functools import cached_property
 
-from liquidity.compute.chart import Chart
 from liquidity.compute.ticker import Ticker
 from liquidity.data.metadata.fields import Fields
+from liquidity.visuals.chart import Chart
 
 
 class YieldSpread:
     """
-    A class to compute and visualize the yield spread between two financial instruments.
+    Calculate and visualize the yield spread between two financial instruments.
 
-    The yield spread represents the difference in yields (expressed as percentage points)
-    between a given financial instrument (ticker) and a benchmark instrument. This class
-    provides tools to calculate the time series of yields, compute the spread, and visualize
-    the result using an interactive Plotly line chart.
+    The yield spread represents the difference in yields (expressed as percentage
+    points) between a given financial instrument (ticker) and a benchmark.
+    This class provides tools to calculate the time series of yields, compute
+    the spread, and visualize the result using an interactive  Plotly line chart.
 
     Attributes:
     ----------
@@ -24,12 +24,12 @@ class YieldSpread:
     Methods:
     -------
     df:
-        Returns a pandas DataFrame containing the time series of yields for both instruments
-        and their computed spread.
+        Returns a pandas DataFrame containing the time series of yields
+        for both instruments and their computed spread.
 
     show():
-        Generates and displays an interactive Plotly chart to visualize the yield spread
-        over time.
+        Generates and displays an interactive Plotly chart to visualize
+        the yield spread over time.
 
     Example:
     --------
@@ -59,8 +59,8 @@ class YieldSpread:
 
     @cached_property
     def df(self):
-        """Returns a pandas DataFrame containing the time series of yields for both instruments
-        and their computed spread.
+        """Returns a pandas DataFrame containing the time series of
+        yields for both instruments and their computed spread.
         """
         ticker = self.ticker.yields.dropna()
         benchmark = self.benchmark.yields.dropna()

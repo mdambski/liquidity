@@ -1,3 +1,4 @@
+import math
 from datetime import datetime, timedelta
 from typing import List
 
@@ -5,12 +6,12 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from liquidity.compute.chart import Chart
 from liquidity.models.price_ratio import PriceRatio
 from liquidity.models.yield_spread import YieldSpread
+from liquidity.visuals.chart import Chart
 
 
-class LiquidityProxies:
+class ChartMatrix:
     """
     A class to display liquidity proxies in a 2x2 grid of charts.
     """
@@ -62,49 +63,66 @@ class LiquidityProxies:
             col=col,
         )
 
-    def display_2x2_matrix(
-        self, charts: List[Chart], yaxis_names: List[str], xaxis_name: str = "Date"
-    ) -> None:
+    def display_matrix(self, charts: List[Chart]) -> None:
         """
-        Display four charts in a 2x2 grid using Plotly.
+        Display four charts in a NxN grid using Plotly.
 
         Args:
             charts (List[Chart]): List of Chart objects to display.
             yaxis_names (List[str]): Y-axis labels for each subplot.
             xaxis_name (str): X-axis label for all subplots (default: "Date").
         """
-        assert len(charts) == 4, "Exactly four charts are required for a 2x2 grid."
+        matrix_side = math.isqrt(len(charts))
+        assert matrix_side**2 == len(charts), (
+            "The number of charts must be a perfect square "
+            "(e.g., 4, 9, 16, etc.) to form a square grid for "
+            "a matrix chart."
+        )
 
-        # Create a 2x2 subplot layout
+        # Create a matrix subplot layout
         fig = make_subplots(
-            rows=2,
-            cols=2,
+            rows=matrix_side,
+            cols=matrix_side,
             subplot_titles=[chart.title for chart in charts],
             shared_xaxes=False,
             shared_yaxes=False,
+            horizontal_spacing=0.1,
+            vertical_spacing=0.15,
         )
 
         # Add each chart to the appropriate subplot
         for idx, chart in enumerate(charts):
-            row, col = divmod(idx, 2)
+            row, col = divmod(idx, matrix_side)
             self.add_chart_to_subplot(fig, chart, row + 1, col + 1)
-            fig.update_yaxes(title_text=yaxis_names[idx], row=row + 1, col=col + 1)
-            fig.update_xaxes(title_text=xaxis_name, row=row + 1, col=col + 1)
+            fig.update_yaxes(title_text=chart.yaxis_name, row=row + 1, col=col + 1)
+            fig.update_xaxes(title_text=chart.xaxis_name, row=row + 1, col=col + 1)
 
         # Update layout and show the figure
         fig.update_layout(
-            title="Liquidity Proxies",
-            title_font=dict(size=20, family="Arial, sans-serif", color="black"),
+            title=dict(
+                text="Liquidity Proxies",
+                font=dict(size=24, family="Helvetica, sans-serif", color="black"),
+                x=0.5,  # Center-align the title
+                xanchor="center",
+            ),
+            yaxis_title=dict(
+                font=dict(size=16, family="Roboto, sans-serif", color="dimgray"),
+            ),
+            font=dict(
+                family="Roboto, sans-serif",
+                size=14,
+                color="dimgray",
+            ),
             plot_bgcolor="white",
             paper_bgcolor="ghostwhite",
-            font=dict(family="Arial, sans-serif", size=14, color="black"),
+            showlegend=False,
         )
         fig.show()
 
 
 if __name__ == "__main__":
     # Instantiate LiquidityProxies object
-    liquidity_proxies = LiquidityProxies(years=5)
+    liquidity_proxies = ChartMatrix(years=5)
 
     # Define the data sources and charts
     charts = [
@@ -112,26 +130,27 @@ if __name__ == "__main__":
             data=YieldSpread("HYG", "LQD").df,
             title="HYG - LQD Yield Spread",
             main_series="Spread",
+            yaxis_name="Yield spread",
         ),
         Chart(
             data=YieldSpread("LQD", "UST-10Y").df,
             title="LQD - UST10Y Yield Spread",
             main_series="Spread",
+            yaxis_name="Yield spread",
         ),
         Chart(
             data=PriceRatio("QQQ", "SPY").df,
             title="QQQ/SPY Price Ratio",
             main_series="Ratio",
+            yaxis_name="Price ratio",
         ),
         Chart(
             data=PriceRatio("ETH", "BTC").df,
             title="ETH/BTC Price Ratio",
             main_series="Ratio",
+            yaxis_name="Price ratio",
         ),
     ]
 
-    # Display the 2x2 grid of charts
-    liquidity_proxies.display_2x2_matrix(
-        charts=charts,
-        yaxis_names=["Yield Diff", "Yield Diff", "Price Ratio", "Price Ratio"],
-    )
+    # Display the matrix grid of charts
+    liquidity_proxies.display_matrix(charts)
