@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from typing import List
 
 import pandas as pd
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+import plotly.graph_objects as go  # type: ignore
+from plotly.subplots import make_subplots  # type: ignore
 
 from liquidity.models.price_ratio import PriceRatio
 from liquidity.models.yield_spread import YieldSpread

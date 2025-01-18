@@ -1,4 +1,5 @@
 import abc
+from typing import Optional
 
 import pandas as pd
 
@@ -13,5 +14,5 @@ class DataProviderBase(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_treasury_yield(self, maturity: str) -> pd.DataFrame:
+    def get_treasury_yield(self, maturity: Optional[str]) -> pd.DataFrame:
         raise NotImplementedError

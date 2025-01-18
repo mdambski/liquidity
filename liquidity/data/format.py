@@ -1,31 +1,46 @@
-from typing import Callable
+from typing import Callable, Optional
 
 import pandas as pd
 
 
 def formatter_factory(
-    cols_mapper: dict = None,
-    index_col: str = None,
-    index_name: str = None,
-    cols_out: list[str] = None,
-    to_numeric: list[str] = None,
+    cols_mapper: Optional[dict] = None,
+    index_col: Optional[str] = None,
+    index_name: Optional[str] = None,
+    cols_out: Optional[list[str]] = None,
+    to_numeric: Optional[list[str]] = None,
     ensure_sorted: bool = True,
 ) -> Callable[[pd.DataFrame], pd.DataFrame]:
-    """Returns formatter func for dataframe post-processing."""
+    """
+    Returns a formatter function for dataframe post-processing.
 
-    def format_func(df):
+    Parameters:
+        cols_mapper (dict, optional): Column renaming mapping.
+        index_col (str, optional): Column to use as the index.
+        index_name (str, optional): New name for the index.
+        cols_out (list[str], optional): List of columns to keep in the final dataframe.
+        to_numeric (list[str], optional): Columns to convert to numeric types.
+        ensure_sorted (bool): Whether to ensure the dataframe is sorted by its index.
+
+    Returns:
+        Callable[[pd.DataFrame], pd.DataFrame]: A function to format dataframes.
+    """
+
+    def format_func(df: pd.DataFrame) -> pd.DataFrame:
         if cols_mapper:
             df = df.rename(cols_mapper, axis=1)
+
         if index_col:
             df = df.set_index(pd.to_datetime(df[index_col]))
+
         if to_numeric:
             df[to_numeric] = df[to_numeric].apply(pd.to_numeric)
+
         if ensure_sorted:
             df = ensure_dataframe_sorted(df)
 
-        index_new_name = index_name or index_col
-        if index_new_name:
-            df.index.name = index_new_name
+        if index_name or index_col:
+            df.index.name = index_name or index_col
 
         return df[cols_out] if cols_out else df
 
@@ -33,17 +48,18 @@ def formatter_factory(
 
 
 def ensure_dataframe_sorted(df: pd.DataFrame) -> pd.DataFrame:
-    """Ensure dataframe index is sorted. This is important
-    for some computations (i.e. ttm dividend calculation)
+    """Ensure dataframe index is sorted.
+
+    Parameters:
+        df (pd.DataFrame): Input dataframe.
+
+    Returns:
+        pd.DataFrame: Dataframe with a sorted index.
     """
     if df.index.is_monotonic_increasing:
-        # already sorted
         return df
 
     if df.index.is_monotonic_decreasing:
-        # if sort order is decreasing - flip it.
-        # Faster than sorting with O(n) complexity.
         return df[::-1]
 
-    # if unsorted execute sorting, with O(n log n) complexity.
     return df.sort_index()

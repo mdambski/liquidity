@@ -54,7 +54,7 @@ def test_get_prices(mock_alpaca_client):
 def test_get_prices_with_dates(mock_alpaca_client):
     provider = AlpacaCryptoDataProvider()
     start_date, end_date = datetime(2023, 1, 1), datetime(2023, 2, 1)
-    df = provider.get_prices("BTC/USD", start=start_date, end=end_date)
+    df = provider.get_prices("BTC", start=start_date, end=end_date)
 
     request_params = mock_alpaca_client.get_crypto_bars.call_args[0][0]
 

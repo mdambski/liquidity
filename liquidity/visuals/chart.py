@@ -2,7 +2,7 @@ import random
 from typing import List, Optional
 
 import pandas as pd
-import plotly.graph_objects as go
+import plotly.graph_objects as go  # type: ignore
 
 
 class Chart:
@@ -65,7 +65,7 @@ class Chart:
 
     def _add_secondary_series(self, fig: go.Figure) -> None:
         """Add secondary series to the figure."""
-        used_colors = set()
+        used_colors: set[str] = set()
         for series in self.secondary_series:
             if series not in self.data.columns:
                 continue

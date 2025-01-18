@@ -23,6 +23,8 @@ pytest = "^8.3.4"
 mypy = "^1.14.1"
 pytest-cov = "^6.0.0"
 pre-commit = "^4.0.1"
+pandas-stubs = "^2.2.3.241126"
+types-python-dateutil = "^2.9.0.20241206"
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, cast
 
 import pandas as pd
 from alpaca.data import CryptoBarsRequest, CryptoHistoricalDataClient, TimeFrame
@@ -79,7 +79,10 @@ class AlpacaCryptoDataProvider(DataProviderBase):
         Returns:
             pd.DataFrame: The formatted DataFrame.
         """
-        df.index = df.index.get_level_values("timestamp").tz_localize(None)
+        df.index = cast(
+            pd.DatetimeIndex, df.index.get_level_values("timestamp")
+        ).tz_localize(None)
+
         alpaca_formatter = formatter_factory(
             index_name=Fields.Date.value,
             cols_mapper={val.lower(): val for val in OHLCV.all_values()},
@@ -90,5 +93,5 @@ class AlpacaCryptoDataProvider(DataProviderBase):
     def get_dividends(self, ticker: str) -> pd.DataFrame:
         raise RuntimeError("Not available for Crypto")
 
-    def get_treasury_yield(self, maturity: str) -> pd.DataFrame:
+    def get_treasury_yield(self, maturity: Optional[str]) -> pd.DataFrame:
         raise RuntimeError("Not available for Crypto")

@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import Optional
 
 import pandas as pd
-from alpha_vantage.econindicators import EconIndicators
-from alpha_vantage.fundamentaldata import FundamentalData
-from alpha_vantage.timeseries import TimeSeries
+from alpha_vantage.econindicators import EconIndicators  # type: ignore
+from alpha_vantage.fundamentaldata import FundamentalData  # type: ignore
+from alpha_vantage.timeseries import TimeSeries  # type: ignore
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
@@ -23,7 +23,7 @@ class AlphaVantageConfig(BaseSettings):
 class AlphaVantageDataProvider(DataProviderBase):
     """Data provider class to fetch financial data from Alpha Vantage API."""
 
-    def __init__(self, api_key: str = None) -> None:
+    def __init__(self, api_key: Optional[str] = None) -> None:
         self.api_key = api_key or AlphaVantageConfig().api_key
         self.output_format = "pandas"
 
@@ -78,7 +78,7 @@ class AlphaVantageDataProvider(DataProviderBase):
         )
         return av_dividend_formatter(df)
 
-    def get_treasury_yield(self, maturity: str = "10year") -> pd.DataFrame:
+    def get_treasury_yield(self, maturity: Optional[str] = "10year") -> pd.DataFrame:
         """
         Fetches treasury yield data for a specified maturity period.
 
