@@ -1,4 +1,3 @@
-import numpy.testing as npt
 import pandas as pd
 import pytest
 
@@ -6,7 +5,6 @@ from liquidity.compute.utils.dividends import compute_ttm_dividend
 from liquidity.data.metadata.fields import Fields
 
 TTM_DIVIDEND_EXPECTED = f"{Fields.TTM_Dividend}_expected"
-IS_FULL_WINDOW = "IS_FULL_WINDOW"
 
 
 @pytest.fixture
@@ -39,10 +37,8 @@ def test_regular_dividends(div_data):
         df=div_data, dividend_frequency=4, partial_window=True
     )
 
-    npt.assert_almost_equal(
-        actual=actual[Fields.TTM_Dividend].values,
-        desired=expected[TTM_DIVIDEND_EXPECTED].values,
-        decimal=4,
+    pd.testing.assert_series_equal(
+        actual[Fields.TTM_Dividend], expected[TTM_DIVIDEND_EXPECTED], check_names=False
     )
 
 
@@ -50,10 +46,8 @@ def test_regular_dividends_partial_false(div_data):
     expected = div_data[div_data["is_full_year"]][[TTM_DIVIDEND_EXPECTED]]
     actual = compute_ttm_dividend(df=div_data, dividend_frequency=4)
 
-    npt.assert_almost_equal(
-        actual=actual[Fields.TTM_Dividend].values,
-        desired=expected[TTM_DIVIDEND_EXPECTED].values,
-        decimal=4,
+    pd.testing.assert_series_equal(
+        actual[Fields.TTM_Dividend], expected[TTM_DIVIDEND_EXPECTED], check_names=False
     )
 
 
