@@ -1,7 +1,8 @@
 from functools import cached_property
 
+import pandas as pd
+
 from liquidity.compute.ticker import Ticker
-from liquidity.data.metadata.fields import Fields
 from liquidity.visuals import Chart
 
 
@@ -58,12 +59,14 @@ class PriceRatio:
     >>> ratio.show()
     """
 
+    series_name = "Ratio"
+
     def __init__(self, ticker: str, benchmark: str = "SPY"):
         self.ticker = Ticker.from_name(ticker)
         self.benchmark = Ticker.from_name(benchmark)
 
     @cached_property
-    def df(self):
+    def df(self) -> pd.DataFrame:
         """Returns a pandas DataFrame containing the time series of prices
         for both instruments and their computed ratio.
         """
@@ -83,12 +86,12 @@ class PriceRatio:
         def ratio_formula(row):
             return row[f"Close{self.ticker.name}"] / row[f"Close{self.benchmark.name}"]
 
-        prices[Fields.Ratio.value] = prices.apply(ratio_formula, axis=1)
+        prices[self.series_name] = prices.apply(ratio_formula, axis=1)
         return prices
 
-    def show(self):
+    def get_chart(self) -> Chart:
         """
-        Generates and displays a chart visualizing the price ratio over time.
+        Generates a chart visualizing the price ratio over time.
 
         Parameters:
         ----------
@@ -96,14 +99,14 @@ class PriceRatio:
             If True, includes all available time series in the chart (default is False,
             which displays only the yield spread).
         """
-        chart_title = f"{self.ticker.name}/{self.benchmark.name} Price Ratio"
-        main_series = Fields.Ratio.value
-
-        chart = Chart(
+        return Chart(
             data=self.df,
-            title=chart_title,
-            main_series=main_series,
-            yaxis_name="Price Ratio",
+            title=f"{self.ticker.name}/{self.benchmark.name} Price Ratio",
+            main_series=self.series_name,
+            yaxis_name="Price ratio",
             xaxis_name="Date",
         )
-        chart.show()
+
+    def show(self) -> None:
+        """Generates and displays a chart visualizing the price ratio over time."""
+        self.get_chart().show()

@@ -1,7 +1,6 @@
 from functools import cached_property
 
 from liquidity.compute.ticker import Ticker
-from liquidity.data.metadata.fields import Fields
 from liquidity.visuals import Chart
 
 
@@ -53,6 +52,8 @@ class YieldSpread:
     >>> spread.show()
     """
 
+    series_name = "Spread"
+
     def __init__(self, ticker: str, benchmark: str = "UST-10Y"):
         self.ticker = Ticker.from_name(ticker)
         self.benchmark = Ticker.from_name(benchmark)
@@ -78,12 +79,12 @@ class YieldSpread:
         def spread_formula(row):
             return row[f"Yield{self.ticker.name}"] - row[f"Yield{self.benchmark.name}"]
 
-        yields[Fields.Spread.value] = yields.apply(spread_formula, axis=1)
+        yields[self.series_name] = yields.apply(spread_formula, axis=1)
         return yields
 
-    def show(self, show_all_series: bool = False):
+    def get_chart(self, show_all_series: bool = False) -> Chart:
         """
-        Generates and displays a chart visualizing the yield spread over time.
+        Generates a chart visualizing the yield spread over time.
 
         Parameters:
         ----------
@@ -91,19 +92,21 @@ class YieldSpread:
             If True, includes all available time series in the chart (default is False,
             which displays only the yield spread).
         """
-        chart_title = f"{self.ticker.name} - {self.benchmark.name} Yield Spread"
-        main_series = Fields.Spread.value
-
         secondary_series = None
         if show_all_series:
-            secondary_series = [col for col in self.df.columns if col != main_series]
+            secondary_series = [
+                col for col in self.df.columns if col != self.series_name
+            ]
 
-        chart = Chart(
+        return Chart(
             data=self.df,
-            title=chart_title,
-            main_series=main_series,
+            title=f"{self.ticker.name} - {self.benchmark.name} Yield Spread",
+            main_series=self.series_name,
             secondary_series=secondary_series,
             yaxis_name="Yield difference in percentage points",
             xaxis_name="Date",
         )
-        chart.show()
+
+    def show(self) -> None:
+        """Generates and displays a chart visualizing the yield spread over time."""
+        self.get_chart().show()

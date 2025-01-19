@@ -1,6 +1,7 @@
 import math
-from datetime import datetime, timedelta
-from typing import List
+from collections.abc import Iterable
+from datetime import datetime
+from typing import Optional, Protocol, Tuple
 
 import pandas as pd
 import plotly.graph_objects as go  # type: ignore
@@ -9,32 +10,71 @@ from plotly.subplots import make_subplots  # type: ignore
 from liquidity.visuals.chart import Chart
 
 
+class ChartableModel(Protocol):
+    def get_chart(self) -> Chart:
+        """Returns a Chart object representing the model's data visualization."""
+        ...
+
+
 class ChartMatrix:
     """
     A class to display liquidity proxies in a 2x2 grid of charts.
     """
 
-    def __init__(self, years: int = 5):
+    def __init__(
+        self,
+        models: Iterable[ChartableModel],
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+    ):
         """
         Initialize the LiquidityProxies object.
 
-        Args:
-            years (int): The number of years of data to filter (default is 5).
-        """
-        self.years = years
+        If no `start_date` or `end_date` are provided, all available data will be used
+        for the charts. This may result in different time ranges for each chart,
+        depending on the data available for each model.
 
-    def filter_data_last_n_years(self, data: pd.DataFrame) -> pd.DataFrame:
+        Args:
+            start_date (datetime, optional): The start date of the time window for the
+                                              chart. If not provided, the earliest
+                                              available data is used.
+            end_date (datetime, optional): The end date of the time window for the
+                                            chart. If not provided, the latest
+                                            available data is used.
         """
-        Filter the DataFrame to include only the last `n` years of data.
+        self.charts = [model.get_chart() for model in models]
+        self.start_date = start_date
+        self.end_date = end_date
+
+    def filter_data(self, data: pd.DataFrame) -> pd.DataFrame:
+        """
+        Filter the DataFrame to include only the desired time period.
 
         Args:
             data (pd.DataFrame): DataFrame with a DateTimeIndex.
 
         Returns:
-            pd.DataFrame: Filtered DataFrame with rows from the last `n` years.
+            pd.DataFrame: Filtered DataFrame with rows for desired time frame.
         """
-        cutoff_date = datetime.now() - timedelta(days=self.years * 365)
-        return data[data.index >= cutoff_date]
+        filtered_data = data.loc[
+            (self.start_date or data.index[0]) : (self.end_date or data.index[-1])
+        ]
+        return filtered_data
+
+    def get_chart_dimensions(self) -> Tuple[int, int]:
+        charts_num = len(self.charts)
+        cols = math.isqrt(charts_num)
+
+        if cols**2 == charts_num:
+            return cols, cols
+
+        cols += 1
+        rows, remainder = divmod(charts_num, cols)
+
+        if remainder > 0:
+            rows += 1
+
+        return rows, cols
 
     def add_chart_to_subplot(
         self, fig: go.Figure, chart: Chart, row: int, col: int
@@ -48,7 +88,7 @@ class ChartMatrix:
             row (int): Row number of the subplot.
             col (int): Column number of the subplot.
         """
-        filtered_data = self.filter_data_last_n_years(chart.data)
+        filtered_data = self.filter_data(chart.data)
         fig.add_trace(
             go.Scatter(
                 x=filtered_data.index,
@@ -61,27 +101,22 @@ class ChartMatrix:
             col=col,
         )
 
-    def display_matrix(self, charts: List[Chart]) -> None:
+    def show(self) -> None:
         """
-        Display four charts in a NxN grid using Plotly.
+        Display four charts in a grid using Plotly.
 
         Args:
             charts (List[Chart]): List of Chart objects to display.
             yaxis_names (List[str]): Y-axis labels for each subplot.
             xaxis_name (str): X-axis label for all subplots (default: "Date").
         """
-        matrix_side = math.isqrt(len(charts))
-        assert matrix_side**2 == len(charts), (
-            "The number of charts must be a perfect square "
-            "(e.g., 4, 9, 16, etc.) to form a square grid for "
-            "a matrix chart."
-        )
+        rows, cols = self.get_chart_dimensions()
 
         # Create a matrix subplot layout
         fig = make_subplots(
-            rows=matrix_side,
-            cols=matrix_side,
-            subplot_titles=[chart.title for chart in charts],
+            rows=rows,
+            cols=cols,
+            subplot_titles=[chart.title for chart in self.charts],
             shared_xaxes=False,
             shared_yaxes=False,
             horizontal_spacing=0.1,
@@ -89,8 +124,8 @@ class ChartMatrix:
         )
 
         # Add each chart to the appropriate subplot
-        for idx, chart in enumerate(charts):
-            row, col = divmod(idx, matrix_side)
+        for idx, chart in enumerate(self.charts):
+            row, col = divmod(idx, cols)
             self.add_chart_to_subplot(fig, chart, row + 1, col + 1)
             fig.update_yaxes(title_text=chart.yaxis_name, row=row + 1, col=col + 1)
             fig.update_xaxes(title_text=chart.xaxis_name, row=row + 1, col=col + 1)
