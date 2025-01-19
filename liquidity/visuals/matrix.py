@@ -6,8 +6,6 @@ import pandas as pd
 import plotly.graph_objects as go  # type: ignore
 from plotly.subplots import make_subplots  # type: ignore
 
-from liquidity.models.price_ratio import PriceRatio
-from liquidity.models.yield_spread import YieldSpread
 from liquidity.visuals.chart import Chart
 
 
@@ -118,39 +116,3 @@ class ChartMatrix:
             showlegend=False,
         )
         fig.show()
-
-
-if __name__ == "__main__":
-    # Instantiate LiquidityProxies object
-    liquidity_proxies = ChartMatrix(years=5)
-
-    # Define the data sources and charts
-    charts = [
-        Chart(
-            data=YieldSpread("HYG", "LQD").df,
-            title="HYG - LQD Yield Spread",
-            main_series="Spread",
-            yaxis_name="Yield spread",
-        ),
-        Chart(
-            data=YieldSpread("LQD", "UST-10Y").df,
-            title="LQD - UST10Y Yield Spread",
-            main_series="Spread",
-            yaxis_name="Yield spread",
-        ),
-        Chart(
-            data=PriceRatio("QQQ", "SPY").df,
-            title="QQQ/SPY Price Ratio",
-            main_series="Ratio",
-            yaxis_name="Price ratio",
-        ),
-        Chart(
-            data=PriceRatio("ETH", "BTC").df,
-            title="ETH/BTC Price Ratio",
-            main_series="Ratio",
-            yaxis_name="Price ratio",
-        ),
-    ]
-
-    # Display the matrix grid of charts
-    liquidity_proxies.display_matrix(charts)

@@ -2,7 +2,7 @@ from functools import cached_property
 
 from liquidity.compute.ticker import Ticker
 from liquidity.data.metadata.fields import Fields
-from liquidity.visuals.chart import Chart
+from liquidity.visuals import Chart
 
 
 class YieldSpread:
@@ -107,10 +107,3 @@ class YieldSpread:
             xaxis_name="Date",
         )
         chart.show()
-
-
-if __name__ == "__main__":
-    spread = YieldSpread("LQD")
-    print(spread.df.head())
-
-    spread.show()

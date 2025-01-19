@@ -27,42 +27,62 @@ Measures the risk premium between investment-grade bonds (LQD) and 10-year Treas
 
 ## Installation
 
-#### Step 1
-**Install Poetry (if not already installed):**
-You can install Poetry by following the instructions from their [official website](https://python-poetry.org/).
-For most systems, you can install it using this command:
+**Install package from PyPi**:
+In order to install package use package manager of your choice, the most standard command is:
 ```bash
-curl -sSL https://install.python-poetry.org | python3 -
+pip install liquidity
 ```
 
-Alternatively, for Windows, you might use:
-```bash
-python -m pip install poetry
-```
-
-#### Step 2
-**Navigate to the Project Directory**: After downloading the project, open a terminal or command prompt, and navigate to the project directory:
-```bash
-git clone https://github.com/mdambski/liquidity.git
-cd liquidity
-```
-
-#### Step 3
-**Install the Dependencies**: Run the following command to install all the dependencies specified in pyproject.toml:
-```bash
-poetry install
-```
-
-#### Step 4
-**Retrieve API Key**: Go to the [Alphavantage.co](https://www.alphavantage.co/) website and retrieve free api-key.
+**Retrieve API Key**: Go to the [Alphavantage.co](https://www.alphavantage.co/) website and retrieve free api-key. Set the api-key as an environment variable.
 ```bash
 export ALPHAVANTAGE_API_KEY="<your-api-key>"
-make run
 ```
 
-This will generate summary of all liquidity proxies:
-Example chart displayed:
-![Liquidity proxies](liquidity/data/examples/liquidity-proxies.png)
+## Usage
+Here is example usage using python code, to display matrix chart with liquidity proxies:
+
+```python
+from liquidity.models import YieldSpread, PriceRatio
+from liquidity.visuals import ChartMatrix, Chart
+
+
+liquidity_proxies = ChartMatrix(years=5)
+
+# Define the data sources and charts
+charts = [
+    Chart(
+        data=YieldSpread("HYG", "LQD").df,
+        title="HYG - LQD Yield Spread",
+        main_series="Spread",
+        yaxis_name="Yield spread",
+    ),
+    Chart(
+        data=YieldSpread("LQD", "UST-10Y").df,
+        title="LQD - UST10Y Yield Spread",
+        main_series="Spread",
+        yaxis_name="Yield spread",
+    ),
+    Chart(
+        data=PriceRatio("QQQ", "SPY").df,
+        title="QQQ/SPY Price Ratio",
+        main_series="Ratio",
+        yaxis_name="Price ratio",
+    ),
+    Chart(
+        data=PriceRatio("ETH", "BTC").df,
+        title="ETH/BTC Price Ratio",
+        main_series="Ratio",
+        yaxis_name="Price ratio",
+    ),
+]
+
+# Display the matrix grid of charts
+liquidity_proxies.display_matrix(charts)
+```
+
+
+This will display example chart:
+![Liquidity proxies](examples/liquidity-proxies.png)
 
 
 ## Data Sources
@@ -75,4 +95,3 @@ This repository is based on market data APIs providing free access to data.
 
 ## Future Improvements
 In the future I plan to add even more data providers and liquidity proxies.
-When there is enough features I will make a PyPI package to simplify installation.

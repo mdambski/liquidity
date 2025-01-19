@@ -2,7 +2,7 @@ from functools import cached_property
 
 from liquidity.compute.ticker import Ticker
 from liquidity.data.metadata.fields import Fields
-from liquidity.visuals.chart import Chart
+from liquidity.visuals import Chart
 
 
 class PriceRatio:
@@ -107,10 +107,3 @@ class PriceRatio:
             xaxis_name="Date",
         )
         chart.show()
-
-
-if __name__ == "__main__":
-    ratio = PriceRatio("ETH", "BTC")
-    print(ratio.df.head())
-
-    ratio.show()
