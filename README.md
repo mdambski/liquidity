@@ -39,51 +39,71 @@ export ALPHAVANTAGE_API_KEY="<your-api-key>"
 ```
 
 ## Usage
-Here is example usage using python code, to display matrix chart with liquidity proxies:
+Below are some example code snippets demonstrating how to display multiple charts combined into a single matrix, showcasing various liquidity proxies:
 
+**Example 1: Display a 2x2 Matrix of Charts**
 ```python
+from datetime import datetime
 from liquidity.models import YieldSpread, PriceRatio
-from liquidity.visuals import ChartMatrix, Chart
+from liquidity.visuals import ChartMatrix
 
-
-liquidity_proxies = ChartMatrix(years=5)
-
-# Define the data sources and charts
-charts = [
-    Chart(
-        data=YieldSpread("HYG", "LQD").df,
-        title="HYG - LQD Yield Spread",
-        main_series="Spread",
-        yaxis_name="Yield spread",
-    ),
-    Chart(
-        data=YieldSpread("LQD", "UST-10Y").df,
-        title="LQD - UST10Y Yield Spread",
-        main_series="Spread",
-        yaxis_name="Yield spread",
-    ),
-    Chart(
-        data=PriceRatio("QQQ", "SPY").df,
-        title="QQQ/SPY Price Ratio",
-        main_series="Ratio",
-        yaxis_name="Price ratio",
-    ),
-    Chart(
-        data=PriceRatio("ETH", "BTC").df,
-        title="ETH/BTC Price Ratio",
-        main_series="Ratio",
-        yaxis_name="Price ratio",
-    ),
-]
+# Define a ChartMatrix object with 4 models
+liquidity_proxies = ChartMatrix(
+    models=[
+        YieldSpread("HYG", "LQD"),
+        YieldSpread("LQD", "UST-10Y"),
+        PriceRatio("QQQ", "SPY"),
+        PriceRatio("ETH", "BTC"),
+    ],
+    start_date=datetime(2020, 1, 1),
+)
 
 # Display the matrix grid of charts
-liquidity_proxies.display_matrix(charts)
+liquidity_proxies.show()
 ```
 
+This code will retrieve data from the available API providers for each of the specified liquidity proxies and display them in a 2x2 matrix chart. The charts will cover the period starting from January 1, 2020. Here's a preview of what the result will look like:
+![Liquidity proxies](examples/matrix-chart-2x2-last-five-years.png)
 
-This will display example chart:
-![Liquidity proxies](examples/liquidity-proxies.png)
 
+**Example 2: Display a 2x3 Matrix of Charts for a Full Year**
+As the number of models increases, the method automatically determines the optimal layout for the matrix grid. For instance, if you have six charts, the layout will adjust accordingly.
+
+Here’s an example of displaying a 2x3 matrix for the year 2024:
+```python
+from datetime import datetime
+from liquidity.models import YieldSpread, PriceRatio
+from liquidity.visuals import ChartMatrix
+
+# Define a ChartMatrix object with 6 models
+liquidity_proxies = ChartMatrix(
+    models=[
+        YieldSpread("HYG", "LQD"),
+        YieldSpread("HYG", "UST-10Y"),
+        YieldSpread("LQD", "UST-10Y"),
+        PriceRatio("QQQ", "SPY"),
+        PriceRatio("BTC", "QQQ"),
+        PriceRatio("ETH", "BTC"),
+    ],
+    start_date=datetime(2024, 1, 1),
+    end_date=datetime(2024, 12, 31),
+)
+
+# Display the matrix of charts
+liquidity_proxies.show()
+```
+
+This example retrieves data for the specified liquidity proxies over the year 2024 and displays the results in a 2x3 matrix. The layout will automatically adjust based on the number of models, ensuring the charts are well-organized and easy to interpret. Here is an example output for the 2024 data:
+![Liquidity proxies](examples/matrix-chart-2x3-2024-year.png)
+
+### Notes:
+- Optional start_date and end_date Parameters: Both the start_date and end_date parameters are optional. If not specified, the method will use the full available data range for each chart. However, be aware that this may cause the time frames of each chart to differ, as different symbols (e.g., "HYG", "QQQ", "ETH") may have varying lengths of historical data available from the API providers.
+
+- Automatic Layout Adjustment: As the number of models increases, the method will automatically adjust the layout of the matrix to ensure the charts are displayed in a clean, readable format.
+
+- Data Retrieval: The charts will pull data from available API providers once a day (subsequent calss will be loaded from cache) for the specified models, ensuring accurate and up-to-date information.
+
+- Custom Date Ranges: If you want to focus on specific time periods, you can provide both start_date and end_date. Otherwise, the method will display data for the full available range.
 
 ## Data Sources
 
