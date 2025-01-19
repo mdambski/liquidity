@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, cast
+from typing import Optional
 
 import pandas as pd
 from alpaca.data import CryptoBarsRequest, CryptoHistoricalDataClient, TimeFrame
@@ -71,23 +71,38 @@ class AlpacaCryptoDataProvider(DataProviderBase):
         return self.client.get_crypto_bars(request_params).df
 
     def _format_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Format the raw dataframe using the common project format.
+        """
+        Format the raw dataframe fetched from the Alpaca API to the project's common format.
+
+        This method performs the necessary transformations on the DataFrame, including:
+        - Extracting and normalizing the datetime index to a consistent format.
+        - Mapping columns to match the expected structure.
+        - Applying a formatter to align with project-specific conventions
+          for comparison across asset classes.
 
         Args:
-            df (pd.DataFrame): The raw DataFrame fetched from the Alpaca API.
+            df (pd.DataFrame): The raw DataFrame fetched from the Alpaca API, containing
+                               asset price data (OHLCV format).
 
         Returns:
-            pd.DataFrame: The formatted DataFrame.
+            pd.DataFrame: The formatted DataFrame, adjusted to meet the project format.
         """
-        df.index = cast(
-            pd.DatetimeIndex, df.index.get_level_values("timestamp")
-        ).tz_localize(None)
+
+        # Alpaca uses MultiIndex (ticker, timestamp). Extract the 'timestamp' index
+        # from the raw dataframe and convert it into a DatetimeIndex.
+        timestamp_index = pd.DatetimeIndex(df.index.get_level_values("timestamp"))
+
+        # Normalize the datetime index to remove any time zone information, ensuring
+        # consistency across different data providers (e.g., stocks vs crypto) for
+        # easier cross-asset class comparisons and joins.
+        df.index = timestamp_index.tz_localize(None).normalize()
 
         alpaca_formatter = formatter_factory(
             index_name=Fields.Date.value,
             cols_mapper={val.lower(): val for val in OHLCV.all_values()},
             cols_out=OHLCV.all_values(),
         )
+
         return alpaca_formatter(df)
 
     def get_dividends(self, ticker: str) -> pd.DataFrame:

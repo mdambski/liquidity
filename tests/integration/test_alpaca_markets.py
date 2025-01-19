@@ -82,7 +82,7 @@ class TestAlpacaCryptoDataProvider:
                 "Volume": [176.411074325, 22.437474624],
             },
             index=pd.DatetimeIndex(
-                data=pd.to_datetime(["2024-01-01T06:00:00", "2024-01-02T06:00:00"]),
+                data=pd.to_datetime(["2024-01-01T00:00:00", "2024-01-02T00:00:00"]),
                 name="Date",
             ),
         )
