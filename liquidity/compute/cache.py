@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from os.path import expanduser
 
 import pandas as pd
@@ -27,8 +28,12 @@ class InMemoryCacheWithPersistence(dict):
 
     def __init__(self, cache_dir: str):
         super().__init__()
-        self.cache_dir = cache_dir
+        self.cache_dir = os.path.join(cache_dir, self.get_date())
         self.ensure_cache_dir()
+
+    def get_date(self) -> str:
+        formatted_date = datetime.now().strftime("%Y%m%d")
+        return formatted_date
 
     def ensure_cache_dir(self):
         if not os.path.exists(self.cache_dir):
