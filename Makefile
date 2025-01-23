@@ -23,7 +23,3 @@ test-e2e:
 .PHONY: install-deps
 install-deps:
 	poetry install --with dev
-
-.PHONY: run
-run:
-	poetry run python -m liquidity.models.proxies
