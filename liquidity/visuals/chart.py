@@ -28,6 +28,7 @@ class Chart:
         secondary_series: Optional[List[str]] = None,
         yaxis_name: str = "Value",
         xaxis_name: str = "Date",
+        secondary_colors: Optional[List[str]] = None,
     ):
         self.data = data
         self.title = title
@@ -35,7 +36,7 @@ class Chart:
         self.secondary_series = secondary_series or []
         self.yaxis_name = yaxis_name
         self.xaxis_name = xaxis_name
-        self.secondary_colors = [
+        self.secondary_colors = secondary_colors or [
             "teal",
             "orange",
             "maroon",
@@ -46,12 +47,12 @@ class Chart:
             "plum",
         ]
 
-    def _get_random_color(self, exclude: set) -> str:
+    def get_random_color(self, exclude: set) -> str:
         """Select a random color from the palette, excluding already used colors."""
         available_colors = [c for c in self.secondary_colors if c not in exclude]
         return random.choice(available_colors) if available_colors else "gray"
 
-    def _add_main_series(self, fig: go.Figure) -> None:
+    def add_main_series(self, fig: go.Figure) -> None:
         """Add the main series to the figure."""
         fig.add_trace(
             go.Scatter(
@@ -63,14 +64,14 @@ class Chart:
             )
         )
 
-    def _add_secondary_series(self, fig: go.Figure) -> None:
+    def add_secondary_series(self, fig: go.Figure) -> None:
         """Add secondary series to the figure."""
         used_colors: set[str] = set()
         for series in self.secondary_series:
             if series not in self.data.columns:
                 continue
 
-            color = self._get_random_color(used_colors)
+            color = self.get_random_color(used_colors)
 
             fig.add_trace(
                 go.Scatter(
@@ -85,7 +86,7 @@ class Chart:
 
             used_colors.add(color)
 
-    def _configure_layout(self, fig: go.Figure) -> None:
+    def configure_layout(self, fig: go.Figure) -> None:
         """Configure the layout of the figure."""
         fig.update_layout(
             title=self.title,
@@ -108,10 +109,14 @@ class Chart:
             font=dict(family="Arial, sans-serif", size=14, color="black"),
         )
 
+    def generate_figure(self) -> go.Figure:
+        """Generate a Plotly figure with all configurations."""
+        fig = go.Figure()
+        self.add_main_series(fig)
+        self.add_secondary_series(fig)
+        self.configure_layout(fig)
+        return fig
+
     def show(self) -> None:
         """Generate and display the chart."""
-        fig = go.Figure()
-        self._add_main_series(fig)
-        self._add_secondary_series(fig)
-        self._configure_layout(fig)
-        fig.show()
+        self.generate_figure().show()
