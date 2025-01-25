@@ -1,10 +1,11 @@
 import math
 from collections.abc import Iterable
 from datetime import datetime
-from typing import Optional, Protocol, Tuple
+from typing import Optional, Protocol, Tuple, Any
 
 import pandas as pd
 import plotly.graph_objects as go  # type: ignore
+from pandas import DatetimeIndex
 from plotly.subplots import make_subplots  # type: ignore
 
 from liquidity.visuals.chart import Chart
@@ -56,10 +57,10 @@ class ChartMatrix:
         Returns:
             pd.DataFrame: Filtered DataFrame with rows for desired time frame.
         """
-        filtered_data = data.loc[
-            (self.start_date or data.index[0]) : (self.end_date or data.index[-1])
-        ]
-        return filtered_data
+        start_date = self.start_date or data.index[0]
+        end_date = self.end_date or data.index[-1]
+
+        return data.loc[start_date:end_date]
 
     def get_chart_dimensions(self) -> Tuple[int, int]:
         charts_num = len(self.charts)
