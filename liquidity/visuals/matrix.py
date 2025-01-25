@@ -1,11 +1,10 @@
 import math
 from collections.abc import Iterable
 from datetime import datetime
-from typing import Optional, Protocol, Tuple, Any
+from typing import Optional, Protocol, Tuple
 
 import pandas as pd
 import plotly.graph_objects as go  # type: ignore
-from pandas import DatetimeIndex
 from plotly.subplots import make_subplots  # type: ignore
 
 from liquidity.visuals.chart import Chart
