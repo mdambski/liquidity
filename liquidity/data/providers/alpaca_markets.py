@@ -72,17 +72,19 @@ class AlpacaCryptoDataProvider(DataProviderBase):
 
     def _format_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Format the raw dataframe fetched from the Alpaca API to the project's common format.
+        Format the raw dataframe fetched from the Alpaca API to the project's
+        common format.
 
-        This method performs the necessary transformations on the DataFrame, including:
+        This method performs the necessary transformations on the DataFrame,
+        including:
         - Extracting and normalizing the datetime index to a consistent format.
         - Mapping columns to match the expected structure.
         - Applying a formatter to align with project-specific conventions
           for comparison across asset classes.
 
         Args:
-            df (pd.DataFrame): The raw DataFrame fetched from the Alpaca API, containing
-                               asset price data (OHLCV format).
+            df (pd.DataFrame): The raw DataFrame fetched from the Alpaca API,
+                                containing asset price data (OHLCV format).
 
         Returns:
             pd.DataFrame: The formatted DataFrame, adjusted to meet the project format.

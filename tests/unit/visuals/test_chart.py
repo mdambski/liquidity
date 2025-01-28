@@ -62,9 +62,10 @@ def test_generated_figure_matches_json(expected_chart_json, generated_chart):
     """
     Test that the generated chart matches the expected JSON fixture.
 
-    If changes are made to the `Chart` class or related libraries that affect the chart's
-    rendering, the test may fail because the generated chart does not match the fixture.
-    Follow these steps to regenerate the fixture and compare the new output:
+    If changes are made to the `Chart` class or related libraries that affect
+    the chart's rendering, the test may fail because the generated chart does
+    not match the fixture. Follow these steps to regenerate the fixture and
+    compare the new output:
 
     ## Regenerating the Fixture:
 

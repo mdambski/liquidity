@@ -56,10 +56,12 @@ class ChartMatrix:
         Returns:
             pd.DataFrame: Filtered DataFrame with rows for desired time frame.
         """
-        start_date = self.start_date or data.index[0]
-        end_date = self.end_date or data.index[-1]
+        assert isinstance(data.index, pd.DatetimeIndex)
 
-        return data.loc[start_date:end_date]
+        start_date = pd.Timestamp(self.start_date or data.index[0])
+        end_date = pd.Timestamp(self.end_date or data.index[-1])
+
+        return data.loc[start_date:end_date]  # type: ignore[misc]
 
     def get_chart_dimensions(self) -> Tuple[int, int]:
         charts_num = len(self.charts)

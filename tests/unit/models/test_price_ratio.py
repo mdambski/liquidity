@@ -61,6 +61,6 @@ class TestPriceRatio:
                 ],
             },
             index=pd.date_range("2023-01-01", periods=2),
-        ).ffill()
+        )
 
         pd.testing.assert_frame_equal(ratio.df, expected)

@@ -73,15 +73,11 @@ class PriceRatio:
         ticker = self.ticker.prices.dropna()
         benchmark = self.benchmark.prices.dropna()
 
-        prices = (
-            ticker.join(
-                benchmark,
-                lsuffix=self.ticker.name,
-                rsuffix=self.benchmark.name,
-            )
-            .ffill()
-            .dropna()
-        )
+        prices = ticker.join(
+            benchmark,
+            lsuffix=self.ticker.name,
+            rsuffix=self.benchmark.name,
+        ).dropna()
 
         def ratio_formula(row):
             return row[f"Close{self.ticker.name}"] / row[f"Close{self.benchmark.name}"]
