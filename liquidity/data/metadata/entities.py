@@ -10,12 +10,25 @@ class AssetTypes(str, Enum):
     Index = "Index"
     Crypto = "Crypto"
     Treasury = "Treasury"
+    EconomicData = "EconomicData"
 
 
 @dataclass
-class AssetMetadata:
+class Metadata:
     ticker: str
     name: str
+    type: AssetTypes
+
+
+@dataclass
+class FredEconomicData(Metadata):
+    unit: Optional[str] = None
+    currency: Optional[str] = None
+    type: AssetTypes = AssetTypes.EconomicData
+
+
+@dataclass
+class AssetMetadata(Metadata):
     type: AssetTypes
     subtype: str
     maturity: Optional[str] = None
