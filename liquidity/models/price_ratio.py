@@ -62,8 +62,8 @@ class PriceRatio:
     series_name = "Ratio"
 
     def __init__(self, ticker: str, benchmark: str = "SPY"):
-        self.ticker = Ticker.from_name(ticker)
-        self.benchmark = Ticker.from_name(benchmark)
+        self.ticker = Ticker.for_symbol(ticker)
+        self.benchmark = Ticker.for_symbol(benchmark)
 
     @cached_property
     def df(self) -> pd.DataFrame:
@@ -75,12 +75,14 @@ class PriceRatio:
 
         prices = ticker.join(
             benchmark,
-            lsuffix=self.ticker.name,
-            rsuffix=self.benchmark.name,
+            lsuffix=self.ticker.symbol,
+            rsuffix=self.benchmark.symbol,
         ).dropna()
 
         def ratio_formula(row):
-            return row[f"Close{self.ticker.name}"] / row[f"Close{self.benchmark.name}"]
+            return (
+                row[f"Close{self.ticker.symbol}"] / row[f"Close{self.benchmark.symbol}"]
+            )
 
         prices[self.series_name] = prices.apply(ratio_formula, axis=1)
         return prices
@@ -97,7 +99,7 @@ class PriceRatio:
         """
         return Chart(
             data=self.df,
-            title=f"{self.ticker.name}/{self.benchmark.name} Price Ratio",
+            title=f"{self.ticker.symbol}/{self.benchmark.symbol} Price Ratio",
             main_series=self.series_name,
             yaxis_name="Price ratio",
             xaxis_name="Date",

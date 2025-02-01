@@ -113,7 +113,7 @@ def get_asset_catalog(
     return ALL_DATA
 
 
-def get_ticker_metadata(ticker: str) -> Metadata:
-    if ticker not in ALL_DATA:
-        raise ValueError(f"missing definition for: {ticker}")
-    return ALL_DATA[ticker]
+def get_symbol_metadata(symbol: str) -> Metadata:
+    if symbol not in ALL_DATA:
+        raise ValueError(f"missing definition for: {symbol}")
+    return ALL_DATA[symbol]

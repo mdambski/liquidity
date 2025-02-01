@@ -35,7 +35,7 @@ def yield_data():
 
 
 @pytest.fixture
-def ticker_name():
+def ticker_symbol():
     return "HYG"
 
 
@@ -49,9 +49,9 @@ def mock_provider(price_data, dividend_data, treasury_yield_data):
 
 
 @pytest.fixture
-def mock_metadata(ticker_name):
+def mock_metadata(ticker_symbol):
     return Mock(
-        ticker=ticker_name,
+        ticker=ticker_symbol,
         name="Asset name",
         is_treasury_yield=False,
         distribution_frequency=12,
@@ -64,9 +64,9 @@ def mock_cache():
 
 
 @pytest.fixture
-def ticker(ticker_name, mock_metadata, mock_provider, mock_cache):
+def ticker(ticker_symbol, mock_metadata, mock_provider, mock_cache):
     return Ticker(
-        name=ticker_name,
+        symbol=ticker_symbol,
         metadata=mock_metadata,
         provider=mock_provider,
         cache=mock_cache,
@@ -91,7 +91,7 @@ class TestTicker:
     def test_prices_property(self, ticker, mock_provider, price_data):
         df = ticker.prices
 
-        mock_provider.get_prices.assert_called_once_with(ticker.name)
+        mock_provider.get_prices.assert_called_once_with(ticker.symbol)
         pd.testing.assert_frame_equal(df, price_data)
 
     def test_dividends_property(

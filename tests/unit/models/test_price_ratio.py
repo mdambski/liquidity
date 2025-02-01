@@ -5,12 +5,12 @@ from liquidity.models.price_ratio import PriceRatio
 
 
 class MockTicker:
-    def __init__(self, name, prices):
-        self.name = name
+    def __init__(self, symbol, prices):
+        self.symbol = symbol
         self.prices = prices
 
     @staticmethod
-    def from_name(name):
+    def for_symbol(symbol: str):
         data = {
             "ETH": pd.DataFrame(
                 {"Close": [1400.5, 1350.25, 1425.0]},
@@ -21,8 +21,8 @@ class MockTicker:
                 index=pd.date_range("2023-01-01", periods=3),
             ),
         }
-        prices = data.get(name, pd.DataFrame())
-        return MockTicker(name, prices)
+        prices = data.get(symbol, pd.DataFrame())
+        return MockTicker(symbol, prices)
 
 
 @pytest.fixture

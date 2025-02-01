@@ -55,8 +55,8 @@ class YieldSpread:
     series_name = "Spread"
 
     def __init__(self, ticker: str, benchmark: str = "UST-10Y"):
-        self.ticker = Ticker.from_name(ticker)
-        self.benchmark = Ticker.from_name(benchmark)
+        self.ticker = Ticker.for_symbol(ticker)
+        self.benchmark = Ticker.for_symbol(benchmark)
 
     @cached_property
     def df(self):
@@ -69,15 +69,17 @@ class YieldSpread:
         yields = (
             ticker.join(
                 benchmark,
-                lsuffix=self.ticker.name,
-                rsuffix=self.benchmark.name,
+                lsuffix=self.ticker.symbol,
+                rsuffix=self.benchmark.symbol,
             )
             .ffill()
             .dropna()
         )
 
         def spread_formula(row):
-            return row[f"Yield{self.ticker.name}"] - row[f"Yield{self.benchmark.name}"]
+            return (
+                row[f"Yield{self.ticker.symbol}"] - row[f"Yield{self.benchmark.symbol}"]
+            )
 
         yields[self.series_name] = yields.apply(spread_formula, axis=1)
         return yields
@@ -100,7 +102,7 @@ class YieldSpread:
 
         return Chart(
             data=self.df,
-            title=f"{self.ticker.name} - {self.benchmark.name} Yield Spread",
+            title=f"{self.ticker.symbol} - {self.benchmark.symbol} Yield Spread",
             main_series=self.series_name,
             secondary_series=secondary_series,
             yaxis_name="Yield difference in percentage points",
