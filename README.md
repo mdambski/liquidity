@@ -4,12 +4,9 @@ This repository provides an overview of key market liquidity proxies and additio
 
 ---
 
-## Global Liquidity Model
+### Global Liquidity Model
 
-This module generates a chart of the **Global Liquidity Model** using data from FRED, the Federal Reserve, the U.S. Treasury, and other central banks. It estimates global liquidity based on publicly available macroeconomic indicators.
-
-
-## Proxies Overview
+The **Global Liquidity Model** provides a index of net liquidity in the financial system by aggregating key U.S. economic indicators from the FRED database. It combines the effects of the Federal Reserve balance sheet, bank reserves, reverse repo operations, and the U.S. Treasury General Account to estimate market liquidity. The model highlights how central bank actions and fiscal flows impact liquidity, offering a clear, data-driven perspective through an interactive stacked area chart.
 
 ### Crypto Proxies
 
@@ -51,8 +48,6 @@ export ALPHAVANTAGE_API_KEY="<your-api-key>"
 ## Usage
 Below are some example code snippets:
 
-#### Generate the Full Model
-
 **Example 1: Generate liquidity model**
 
 ```python
@@ -78,8 +73,10 @@ model = GlobalLiquidity(
 model.show()
 ```
 
-Below are code snippets demonstrating how to display multiple charts combined into a single matrix, showcasing various liquidity proxies:
-**Example 2: Display a 2x2 Matrix of Charts**
+Next examples demonstrate how to display multiple liquidity proxies charts combined into a single matrix, showcasing various liquidity proxies and date periods:
+
+**Example 2: Display a 2x2 Matrix from specific date**
+
 ```python
 from datetime import datetime
 from liquidity.models import YieldSpread, PriceRatio
@@ -104,7 +101,7 @@ This code will retrieve data from the available API providers for each of the sp
 ![Liquidity proxies](examples/matrix-chart-2x2-last-five-years.png)
 
 
-**Example 3: Display a 2x3 Matrix of Charts for a Full Year**
+**Example 3: Display a 2x3 Matrix of Charts for a specific year**
 As the number of models increases, the method automatically determines the optimal layout for the matrix grid. For instance, if you have six charts, the layout will adjust accordingly.
 
 Here’s an example of displaying a 2x3 matrix for the year 2024:
