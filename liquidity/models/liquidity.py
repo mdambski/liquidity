@@ -11,38 +11,47 @@ from liquidity.data.providers.fred import FredEconomicDataProvider
 
 class GlobalLiquidity:
     """
-    The Global Liquidity model estimates net financial system liquidity using key macroeconomic
-    indicators from the FRED database. It captures how central banks and fiscal authorities
-    inject or withdraw liquidity from markets.
+    The Global Liquidity model estimates net financial system liquidity using key
+    macroeconomic indicators from the FRED database. It captures how central banks and fiscal
+    authorities inject or withdraw liquidity from markets.
 
     Notes
     -----
     The liquidity index aggregates the effects of:
 
-    - **WALCL (Fed Balance Sheet)**:
-        Positive impact. Fed asset growth (e.g., QE) injects liquidity.
+    1. US Federal Reserve Balance Sheet (WALCL):
+       - Measures the total assets on the Fed's balance sheet.
+       - Impact: Positive. Increases in Fed assets (e.g., through asset purchases) inject
+         liquidity into the system.
 
-    - **WRESBAL (Reserve Balances)**:
-        Positive impact. Higher reserves at the Fed signal ample bank liquidity.
+    2. Reserve Balances with Federal Reserve Banks (WRESBAL):
+       - Total reserves held by commercial banks at the Fed.
+       - Impact: Positive. Higher reserve balances indicate more available liquidity for
+         lending and economic activity.
 
-    - **RRPONTSYD (Reverse Repos)**:
-        Negative impact. Used by the Fed to temporarily absorb excess liquidity.
+    3. Overnight Reverse Repurchase Agreements (RRPONTSYD):
+       - Represents short-term sales of securities by the Fed with an agreement to repurchase
+         them.
+       - Impact: Negative. Reverse repos drain liquidity from the system by temporarily
+         absorbing money.
 
-    - **WTREGEN (Treasury General Account)**:
-        Negative impact. A higher TGA balance withdraws liquidity from circulation.
+    4. U.S. Treasury General Account (WTREGEN):
+       - The government's account at the Fed used for daily operations.
+       - Impact: Negative. Increases in the TGA reduce liquidity in the financial system as
+         funds are absorbed by the government.
 
-    - **ECBASSETSW (ECB Balance Sheet)**:
-        Positive impact. Captures cross-border liquidity from the eurozone.
+    5. ECB Balance Sheet (ECBASSETSW):
+       - Measures total assets held by the European Central Bank.
+       - Impact: Positive. ECB asset purchases contribute to global liquidity flows.
 
     Model Description:
     The liquidity index is computed by summing the contributions of the above components,
-    with positive impacts added and negative impacts subtracted. All data is standardized
+    with positive impacts added and negative impacts subtracted. All values are standardized
     to billions of USD.
 
     Visualization:
-    The model includes a stacked area chart showing the individual contributions of each
-    series and the combined liquidity index. The main liquidity index is plotted in red
-    and with a thicker line for clarity.
+    The model displays a stacked area chart showing the individual contributions of each
+    series, with the overall liquidity index overlaid in bold for clarity.
 
     Examples
     --------
