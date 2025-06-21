@@ -4,6 +4,11 @@ This repository provides an overview of key market liquidity proxies and additio
 
 ---
 
+## Global Liquidity Model
+
+This module generates a chart of the **Global Liquidity Model** using data from FRED, the Federal Reserve, the U.S. Treasury, and other central banks. It estimates global liquidity based on publicly available macroeconomic indicators.
+
+
 ## Proxies Overview
 
 ### Crypto Proxies
@@ -33,15 +38,50 @@ In order to install package use package manager of your choice, the most standar
 pip install liquidity
 ```
 
-**Retrieve API Key**: Go to the [Alphavantage.co](https://www.alphavantage.co/) website and retrieve free api-key. Set the api-key as an environment variable.
+**Retrieve API Key**: Depending on what charts/models you want to generate you will need corresponding key:
+- For FRED Economic database request the key from FRED. [Here are instructions](https://fred.stlouisfed.org/docs/api/api_key.html).
+- For crypto go to the [Alphavantage.co](https://www.alphavantage.co/) website and retrieve free api-key.
+
+Set the api-key as an environment variable.
 ```bash
+export FRED_API_KEY="<your-api-key>"
 export ALPHAVANTAGE_API_KEY="<your-api-key>"
 ```
 
 ## Usage
-Below are some example code snippets demonstrating how to display multiple charts combined into a single matrix, showcasing various liquidity proxies:
+Below are some example code snippets:
 
-**Example 1: Display a 2x2 Matrix of Charts**
+#### Generate the Full Model
+
+**Example 1: Generate liquidity model**
+
+To generate the model using all available data:
+
+```python
+from liquidity.models.liquidity import GlobalLiquidity
+
+model = GlobalLiquidity()
+model.show()
+```
+
+The code will retrieve data using the FRED Economi database API, and generate the liquidity chart. Below example of generated chart:
+![Liquidity proxies](examples/global-liquidity-model.png)
+
+To generate the model for a specific date range:
+
+```python
+from liquidity.models.liquidity import GlobalLiquidity
+from datetime import datetime
+
+model = GlobalLiquidity(
+    start_date=datetime(2021, 1, 1),
+    end_date=datetime(2024, 12, 31)
+)
+model.show()
+```
+
+Below are code snippets demonstrating how to display multiple charts combined into a single matrix, showcasing various liquidity proxies:
+**Example 2: Display a 2x2 Matrix of Charts**
 ```python
 from datetime import datetime
 from liquidity.models import YieldSpread, PriceRatio
@@ -66,7 +106,7 @@ This code will retrieve data from the available API providers for each of the sp
 ![Liquidity proxies](examples/matrix-chart-2x2-last-five-years.png)
 
 
-**Example 2: Display a 2x3 Matrix of Charts for a Full Year**
+**Example 3: Display a 2x3 Matrix of Charts for a Full Year**
 As the number of models increases, the method automatically determines the optimal layout for the matrix grid. For instance, if you have six charts, the layout will adjust accordingly.
 
 Here’s an example of displaying a 2x3 matrix for the year 2024:
@@ -110,6 +150,7 @@ This example retrieves data for the specified liquidity proxies over the year 20
 This repository is based on market data APIs providing free access to data.
 
 - **Cryptocurrency Prices**: [Alpaca.markets](https://alpaca.markets/)
+- **FRED Economic Database**: [FRED](https://www.stlouisfed.org/)
 - **Other Market Data**: [Alphavantage.co](https://www.alphavantage.co/)
 
 
