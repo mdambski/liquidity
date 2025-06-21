@@ -1,5 +1,5 @@
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
@@ -10,12 +10,25 @@ class AssetTypes(str, Enum):
     Index = "Index"
     Crypto = "Crypto"
     Treasury = "Treasury"
+    EconomicData = "EconomicData"
 
 
 @dataclass
-class AssetMetadata:
+class Metadata:
     ticker: str
     name: str
+    type: AssetTypes
+
+
+@dataclass
+class FredEconomicData(Metadata):
+    unit: str
+    currency: str
+    type: AssetTypes = field(default=AssetTypes.EconomicData, init=False)
+
+
+@dataclass
+class AssetMetadata(Metadata):
     type: AssetTypes
     subtype: str
     maturity: Optional[str] = None

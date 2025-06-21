@@ -1,6 +1,9 @@
+import functools
+import hashlib
 import os
 from datetime import datetime
-from os.path import expanduser
+from pathlib import Path
+from typing import Union
 
 import pandas as pd
 from pydantic import Field
@@ -13,10 +16,50 @@ class CacheConfig(BaseSettings):
     """Configuration settings for Alpha Vantage API."""
 
     enabled: bool = Field(default=True, alias="CACHE_ENABLED")
-    data_dir: str = Field(
-        default=os.path.join(expanduser("~"), ".liquidity", "data"),
+    data_dir: Path = Field(
+        default=Path.home() / ".liquidity" / "data",
         alias="CACHE_DATA_DIR",
     )
+
+    @classmethod
+    def cache_dir(cls) -> Path:
+        """Return the cache directory for the current date."""
+        path = cls().data_dir / datetime.now().strftime("%Y%m%d")
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+
+def generate_cache_key(func, args, kwargs):
+    """Generate a unique cache key based on function name and arguments."""
+    key = "-".join([func.__name__, *args, *kwargs])
+    return hashlib.blake2b(key.encode()).hexdigest()
+
+
+def cache_with_persistence(func):
+    """Decorator to cache function outputs in-memory and persist to disk."""
+    cache, cache_dir = {}, CacheConfig.cache_dir()
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        key = generate_cache_key(func, args[1:], kwargs)
+
+        if key in cache:
+            return cache[key]
+
+        file_path = cache_dir / f"{key}.csv"
+        if file_path.exists():
+            df = pd.read_csv(
+                file_path, index_col=Fields.Date.value, parse_dates=[Fields.Date.value]
+            )
+            cache[key] = df
+            return cache[key]
+
+        result = func(*args, **kwargs)
+        cache[key] = result
+        result.to_csv(file_path)
+        return result
+
+    return wrapper
 
 
 class InMemoryCacheWithPersistence(dict):
@@ -26,7 +69,7 @@ class InMemoryCacheWithPersistence(dict):
     data between executions. This can lower number of api calls.
     """
 
-    def __init__(self, cache_dir: str):
+    def __init__(self, cache_dir: Union[str, Path]):
         super().__init__()
         self.cache_dir = os.path.join(cache_dir, self.get_date())
         self.ensure_cache_dir()

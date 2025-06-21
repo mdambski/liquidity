@@ -1,9 +1,14 @@
 from datetime import datetime
 from typing import Optional
 
-from liquidity.data.metadata.entities import AssetMetadata, AssetTypes
+from liquidity.data.metadata.entities import (
+    AssetMetadata,
+    AssetTypes,
+    FredEconomicData,
+    Metadata,
+)
 
-ALL_ASSETS = {
+ALL_DATA = {
     "HYG": AssetMetadata(
         ticker="HYG",
         name="iShares iBoxx $ High Yield Corporate Bond ETF",
@@ -63,19 +68,52 @@ ALL_ASSETS = {
         type=AssetTypes.Crypto,
         subtype="Spot",
     ),
+    "WRESBAL": FredEconomicData(
+        ticker="WRESBAL",
+        name="Reserve Balances with FED Banks",
+        currency="USD",
+        unit="Billions",
+    ),
+    "WTREGEN": FredEconomicData(
+        ticker="RRPONTSYD",
+        name="Treasury General Account (TGA) Balance",
+        currency="USD",
+        unit="Billions",
+    ),
+    "RRPONTSYD": FredEconomicData(
+        ticker="RRPONTSYD", name="Reverse Repo", currency="USD", unit="Billions"
+    ),
+    "WALCL": FredEconomicData(
+        ticker="WALCL",
+        name="US Federal Reserve (FED) Balance Sheet",
+        currency="USD",
+        unit="Millions",
+    ),
+    "ECBASSETSW": FredEconomicData(
+        ticker="ECBASSETSW",
+        name="European Central Bank (ECB) Balance Sheet",
+        currency="EUR",
+        unit="Millions",
+    ),
+    "JPNASSETS": FredEconomicData(
+        ticker="JPNASSETS",
+        name="Bank of Japan (BoJ) Balance Sheet",
+        currency="JPY",
+        unit="100 Million",
+    ),
 }
 
 
 def get_asset_catalog(
     asset_type: Optional[AssetTypes] = None,
-) -> dict[str, AssetMetadata]:
+) -> dict[str, Metadata]:
     """Returns catalog of assets of the specified type."""
     if asset_type:
-        return {k: v for k, v in ALL_ASSETS.items() if v.type == asset_type}
-    return ALL_ASSETS
+        return {k: v for k, v in ALL_DATA.items() if v.type == asset_type}
+    return ALL_DATA
 
 
-def get_ticker_metadata(ticker: str) -> AssetMetadata:
-    if ticker not in ALL_ASSETS:
-        raise ValueError(f"missing definition for: {ticker}")
-    return ALL_ASSETS[ticker]
+def get_symbol_metadata(symbol: str) -> Metadata:
+    if symbol not in ALL_DATA:
+        raise ValueError(f"missing definition for: {symbol}")
+    return ALL_DATA[symbol]

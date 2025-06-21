@@ -8,9 +8,7 @@ from liquidity.compute.ticker import Ticker
 
 @pytest.fixture
 def price_data():
-    return pd.DataFrame(
-        {"Price": [100, 101, 102]}, index=pd.date_range("2025-01-01", periods=3)
-    )
+    return pd.DataFrame({"Price": [100, 101, 102]}, index=pd.date_range("2025-01-01", periods=3))
 
 
 @pytest.fixture
@@ -29,13 +27,11 @@ def treasury_yield_data():
 
 @pytest.fixture
 def yield_data():
-    return pd.DataFrame(
-        {"Yield": [0.2, 0.3, 0.4]}, index=pd.date_range("2024-01-01", periods=3)
-    )
+    return pd.DataFrame({"Yield": [0.2, 0.3, 0.4]}, index=pd.date_range("2024-01-01", periods=3))
 
 
 @pytest.fixture
-def ticker_name():
+def ticker_symbol():
     return "HYG"
 
 
@@ -49,9 +45,9 @@ def mock_provider(price_data, dividend_data, treasury_yield_data):
 
 
 @pytest.fixture
-def mock_metadata(ticker_name):
+def mock_metadata(ticker_symbol):
     return Mock(
-        ticker=ticker_name,
+        ticker=ticker_symbol,
         name="Asset name",
         is_treasury_yield=False,
         distribution_frequency=12,
@@ -64,9 +60,9 @@ def mock_cache():
 
 
 @pytest.fixture
-def ticker(ticker_name, mock_metadata, mock_provider, mock_cache):
+def ticker(ticker_symbol, mock_metadata, mock_provider, mock_cache):
     return Ticker(
-        name=ticker_name,
+        symbol=ticker_symbol,
         metadata=mock_metadata,
         provider=mock_provider,
         cache=mock_cache,
@@ -91,12 +87,10 @@ class TestTicker:
     def test_prices_property(self, ticker, mock_provider, price_data):
         df = ticker.prices
 
-        mock_provider.get_prices.assert_called_once_with(ticker.name)
+        mock_provider.get_prices.assert_called_once_with(ticker.symbol)
         pd.testing.assert_frame_equal(df, price_data)
 
-    def test_dividends_property(
-        self, ticker, dividend_data, mock_metadata, compute_dividend_mock
-    ):
+    def test_dividends_property(self, ticker, dividend_data, mock_metadata, compute_dividend_mock):
         df = ticker.dividends
 
         compute_dividend_mock.assert_called_once_with(

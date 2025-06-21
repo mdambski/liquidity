@@ -1,0 +1,35 @@
+version: '3'
+
+tasks:
+  delint:
+    desc: Run Ruff in fix and format mode
+    cmds:
+      - poetry run ruff check --fix-only
+      - poetry run ruff format .
+
+  lint:
+    desc: Run Ruff in check mode and MyPy
+    deps: [mypy]
+    cmds:
+      - poetry run ruff check
+      - poetry run ruff format . --check
+
+  mypy:
+    desc: Run MyPy type checking
+    cmds:
+      - poetry run mypy .
+
+  test:
+    desc: Run unit tests with coverage
+    cmds:
+      - poetry run pytest tests/ --cov=liquidity --ignore tests/e2e
+
+  test-e2e:
+    desc: Run end-to-end tests
+    cmds:
+      - poetry run pytest tests/e2e
+
+  install-deps:
+    desc: Install development dependencies
+    cmds:
+      - poetry install --with dev

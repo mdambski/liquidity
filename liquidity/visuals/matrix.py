@@ -78,9 +78,7 @@ class ChartMatrix:
 
         return rows, cols
 
-    def add_chart_to_subplot(
-        self, fig: go.Figure, chart: Chart, row: int, col: int
-    ) -> None:
+    def add_chart_to_subplot(self, fig: go.Figure, chart: Chart, row: int, col: int) -> None:
         """
         Add a chart's main series to a subplot.
 

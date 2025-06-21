@@ -33,18 +33,14 @@ def test_compute_dividend_yield(sample_prices, sample_dividends):
         (3 / 110) * 100,  # 2025-01-03
         (3 / 115) * 100,  # 2025-01-04
     ]
-    expected_index = pd.to_datetime(
-        ["2025-01-01", "2025-01-02", "2025-01-03", "2025-01-04"]
-    )
+    expected_index = pd.to_datetime(["2025-01-01", "2025-01-02", "2025-01-03", "2025-01-04"])
     expected = pd.DataFrame({Fields.Yield: expected_yield}, index=expected_index)
 
     pd.testing.assert_frame_equal(result, expected)
 
 
 def test_missing_data_in_prices(sample_dividends):
-    prices = pd.DataFrame(
-        {OHLCV.Close: [None, None, None, None]}, index=sample_dividends.index
-    )
+    prices = pd.DataFrame({OHLCV.Close: [None, None, None, None]}, index=sample_dividends.index)
     with pytest.raises(TypeError):
         compute_dividend_yield(prices, sample_dividends)
 
@@ -56,7 +52,5 @@ def test_no_dividends(sample_prices):
     result = compute_dividend_yield(sample_prices, dividends)
 
     # There are no dividends so expected yield is 0
-    expected = pd.DataFrame(
-        {Fields.Yield: [0.0, 0.0, 0.0, 0.0]}, index=sample_prices.index
-    )
+    expected = pd.DataFrame({Fields.Yield: [0.0, 0.0, 0.0, 0.0]}, index=sample_prices.index)
     pd.testing.assert_frame_equal(result, expected)

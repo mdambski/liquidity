@@ -80,6 +80,4 @@ def test_generated_figure_matches_json(expected_chart_json, generated_chart):
 
     Afterward, run `pytest` to confirm the generated chart matches the new fixture.
     """
-    assert (
-        generated_chart == expected_chart_json
-    ), "Generated figure does not match expected JSON"
+    assert generated_chart == expected_chart_json, "Generated figure does not match expected JSON"

@@ -100,9 +100,7 @@ class Chart:
                 tickangle=45,
                 gridcolor="whitesmoke",
             ),
-            yaxis=dict(
-                showgrid=True, zeroline=True, gridcolor="whitesmoke", tickformat=".2f"
-            ),
+            yaxis=dict(showgrid=True, zeroline=True, gridcolor="whitesmoke", tickformat=".2f"),
             plot_bgcolor="white",
             paper_bgcolor="ghostwhite",
             hovermode="closest",
