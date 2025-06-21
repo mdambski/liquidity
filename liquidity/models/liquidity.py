@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional, Tuple
 
 import pandas as pd
 import plotly.graph_objects as go  # type: ignore
@@ -11,30 +11,28 @@ from liquidity.data.providers.fred import FredEconomicDataProvider
 
 class GlobalLiquidity:
     """
-    The Global Liquidity model computes a combined net liquidity index based on key economic
-    indicators from the FRED database.
+    The Global Liquidity model estimates net financial system liquidity using key macroeconomic
+    indicators from the FRED database. It captures how central banks and fiscal authorities
+    inject or withdraw liquidity from markets.
 
-    Data Series:
-    1. US Federal Reserve Balance Sheet (WALCL):
-       - Measures the total assets on the Fed's balance sheet.
-       - Impact: Positive. Increases in Fed assets (e.g., through asset purchases) inject
-                    liquidity into the system.
+    Notes
+    -----
+    The liquidity index aggregates the effects of:
 
-    2. Reserve Balances with Federal Reserve Banks (WRESBAL):
-       - Total reserves held by commercial banks at the Fed.
-       - Impact: Positive. Higher reserve balances indicate more available liquidity for
-                    lending and economic activity.
+    - **WALCL (Fed Balance Sheet)**:
+        Positive impact. Fed asset growth (e.g., QE) injects liquidity.
 
-    3. Overnight Reverse Repurchase Agreements (RRPONTSYD):
-       - Represents short-term sales of securities by the Fed with an agreement
-            to repurchase them.
-       - Impact: Negative. Reverse repos drain liquidity from the system by temporarily
-            absorbing money.
+    - **WRESBAL (Reserve Balances)**:
+        Positive impact. Higher reserves at the Fed signal ample bank liquidity.
 
-    4. U.S. Treasury General Account (WTREGEN):
-       - The government's account at the Fed used for daily operations.
-       - Impact: Negative. Increases in the TGA reduce liquidity in the financial system
-            as funds are absorbed by the government.
+    - **RRPONTSYD (Reverse Repos)**:
+        Negative impact. Used by the Fed to temporarily absorb excess liquidity.
+
+    - **WTREGEN (Treasury General Account)**:
+        Negative impact. A higher TGA balance withdraws liquidity from circulation.
+
+    - **ECBASSETSW (ECB Balance Sheet)**:
+        Positive impact. Captures cross-border liquidity from the eurozone.
 
     Model Description:
     The liquidity index is computed by summing the contributions of the above components,
@@ -45,128 +43,111 @@ class GlobalLiquidity:
     The model includes a stacked area chart showing the individual contributions of each
     series and the combined liquidity index. The main liquidity index is plotted in red
     and with a thicker line for clarity.
+
+    Examples
+    --------
+    >>> model = GlobalLiquidity(start_date=datetime(2020, 1, 1))
+    >>> model.show()
     """
 
-    SERIES_MAPPING = {
-        "ECB Balance Sheet": ("ECBASSETSW", 1),  # Positive impact on liquidity
-        "Fed Balance Sheet": ("WALCL", 1),  # Positive impact on liquidity
-        "Reserve Balances": ("WRESBAL", 1),  # Positive impact on liquidity
-        "Reverse Repo": ("RRPONTSYD", -1),  # Negative impact (liquidity drain)
-        "Treasury General Account": (
-            "WTREGEN",
-            -1,
-        ),  # Negative impact (liquidity drain)
+    SERIES_MAPPING: Dict[str, Tuple[str, int]] = {
+        "ECB Balance Sheet": ("ECBASSETSW", 1),
+        "Fed Balance Sheet": ("WALCL", 1),
+        "Reserve Balances": ("WRESBAL", 1),
+        "Reverse Repo": ("RRPONTSYD", -1),
+        "Treasury General Account": ("WTREGEN", -1),
+    }
+
+    CURRENCY_CONVERSIONS = {
+        ("USD", "EUR"): "DEXUSEU",
+        ("JPY", "USD"): "DEXJPUS",
+    }
+
+    UNIT_CONVERSION_FACTORS = {
+        "Millions": 1e-3,
+        "Billions": 1,
+        "Trillions": 1e3,
     }
 
     def __init__(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
         self.provider = FredEconomicDataProvider()
-        self.start_date = start_date
-        self.end_date = end_date
-        self.data = self._fetch_data()
+        self.start_date = pd.Timestamp(start_date) if start_date else None
+        self.end_date = pd.Timestamp(end_date) if end_date else None
+        self.data = self._load_data()
 
-    def filter_data(self, data: pd.DataFrame) -> pd.DataFrame:
+    def _load_data(self) -> pd.DataFrame:
         """
-        Filter the DataFrame to include only the desired time period.
-
-        Args:
-            data (pd.DataFrame): DataFrame with a DateTimeIndex.
-
+        Fetches and processes all configured FRED data series.
         Returns:
-            pd.DataFrame: Filtered DataFrame with rows for desired time frame.
+            pd.DataFrame: Combined, signed, and standardized data.
         """
-        assert isinstance(data.index, pd.DatetimeIndex)
-
-        start_date = pd.Timestamp(self.start_date or data.index[0])
-        end_date = pd.Timestamp(self.end_date or data.index[-1])
-
-        return data.loc[start_date:end_date]  # type: ignore[misc]
-
-    def _get_fred_metadata(self, ticker: str) -> FredEconomicData:
-        metadata = get_symbol_metadata(ticker)
-        if not isinstance(metadata, FredEconomicData):
-            actual_type = type(metadata)
-            raise ValueError(f"Invalid type. Expected FredEcoonomicData, got {actual_type} instead")
-        return metadata
-
-    def _fetch_data(self) -> pd.DataFrame:
-        """Fetch all required data series and return a combined DataFrame."""
-        dfs = []
+        processed_series = []
 
         for name, (ticker, sign) in self.SERIES_MAPPING.items():
-            df = self.provider.get_data(ticker)
-            df.rename(columns={"Close": name}, inplace=True)
+            df = self.provider.get_data(ticker).rename(columns={"Close": name})
+            metadata = self._validate_and_get_metadata(ticker)
+            df = self._standardize_series(df, name, metadata)
+            df[name] *= sign
+            processed_series.append(self._filter_date_range(df))
 
-            # Get metadata to check unit
-            metadata = self._get_fred_metadata(ticker)
+        combined = pd.concat(processed_series, axis=1).ffill().dropna()
+        return combined
 
-            df = self.ensure_consistent_unit(df, metadata)
+    def _validate_and_get_metadata(self, ticker: str) -> FredEconomicData:
+        metadata = get_symbol_metadata(ticker)
+        if not isinstance(metadata, FredEconomicData):
+            raise ValueError(f"Expected FredEconomicData, got {type(metadata)} for {ticker}")
+        return metadata
 
-            # Apply sign to reflect liquidity impact
-            df *= sign
-
-            dfs.append(self.filter_data(df))
-
-        # Merge all data on the date index
-        combined_df = pd.concat(dfs, axis=1).ffill().dropna()
-
-        return combined_df
-
-    def convert_currency(
-        self, df: pd.DataFrame, currency_from: str, currency_to: str
+    def _standardize_series(
+        self, df: pd.DataFrame, column: str, metadata: FredEconomicData
     ) -> pd.DataFrame:
-        """Convert currency from original currency like JPY, EUR to desired currency like USD,
-        to ensure the comparison is consistent. Currency conversions are executed using the
-        exchange course retrieved from FRED Economic database.
-        """
+        df = self._convert_currency(df, column, metadata.currency, "USD")
+        df[column] *= self.UNIT_CONVERSION_FACTORS.get(metadata.unit, 1)
+        return df
+
+    def _convert_currency(
+        self, df: pd.DataFrame, column: str, currency_from: str, currency_to: str
+    ) -> pd.DataFrame:
         if currency_from == currency_to:
             return df
 
-        # This is mapping with supported currency conversions.
-        # The mapping uses FRED series, the format of the mapping:
-        # Dict[(currency_from, currency_to), fred_series]
-        conversions_map = {("USD", "EUR"): "DEXUSEU", ("JPY", "USD"): "DEXJPUS"}
+        # Check direct or inverse conversion series
+        pair = (currency_from, currency_to)
+        inverse_pair = (currency_to, currency_from)
 
-        key = (currency_from, currency_to)
-        inv = (currency_to, currency_from)
-
-        if key in conversions_map:
-            fred_series = conversions_map[key]
-            exchange_rate = self.provider.get_data(fred_series)
-
-        elif inv in conversions_map:
-            fred_series = conversions_map[inv]
-            exchange_rate = self.provider.get_data(fred_series)
-            exchange_rate = 1 / exchange_rate
-
+        if pair in self.CURRENCY_CONVERSIONS:
+            fx_series = self.provider.get_data(self.CURRENCY_CONVERSIONS[pair])
+            fx_rate = fx_series["Close"]
+        elif inverse_pair in self.CURRENCY_CONVERSIONS:
+            fx_series = self.provider.get_data(self.CURRENCY_CONVERSIONS[inverse_pair])
+            fx_rate = 1 / fx_series["Close"]
         else:
-            raise ValueError("Unsupported currency pair")
+            raise ValueError(
+                f"Currency conversion from {currency_from} to {currency_to} not supported"
+            )
 
-        def convert_currency(row):
-            return row["ECB Balance Sheet"] * row["Close"]
+        # Align and multiply with FX rate
+        df = df.copy()
+        df["fx"] = fx_rate.ffill()
+        df[column] = df[column] / df["fx"]
+        return df.drop(columns="fx")
 
-        df = pd.concat([df, exchange_rate.ffill()], axis=1).dropna()
+    def _filter_date_range(self, df: pd.DataFrame) -> pd.DataFrame:
+        if not isinstance(df.index, pd.DatetimeIndex):
+            raise ValueError("DataFrame index must be a DatetimeIndex")
 
-        return pd.DataFrame(
-            data={"ECB Balance Sheet": df.apply(convert_currency, axis=1)},
-            index=df.index,
-        )
-
-    def convert_unit(self, df: pd.DataFrame, unit: str) -> pd.DataFrame:
-        coefficient = {"Millions": 0.001, "Billions": 1, "Trillions": 1000}[unit]
-
-        if coefficient != 1:
-            df *= coefficient
-
-        return df
-
-    def ensure_consistent_unit(self, df: pd.DataFrame, metadata: FredEconomicData) -> pd.DataFrame:
-        df = self.convert_currency(df, currency_from=metadata.currency, currency_to="USD")
-        df = self.convert_unit(df, unit=metadata.unit)
-        return df
+        start = self.start_date or df.index.min()
+        end = self.end_date or df.index.max()
+        return df.loc[start:end]  # type: ignore[misc]
 
     @property
     def liquidity_index(self) -> pd.DataFrame:
-        """Compute the net liquidity index by summing all series."""
+        """
+        Computes the total net liquidity index.
+        Returns:
+            pd.DataFrame: Original series + computed 'Liquidity Index' column.
+        """
         df = self.data.copy()
         df["Liquidity Index"] = df.sum(axis=1)
         return df
