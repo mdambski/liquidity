@@ -16,3 +16,4 @@ repos:
           entry: task lint
           language: system  # execute in the system shell
           types: [python]  # trigger for python files
+          pass_filenames: false

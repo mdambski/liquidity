@@ -80,9 +80,7 @@ class PriceRatio:
         ).dropna()
 
         def ratio_formula(row):
-            return (
-                row[f"Close{self.ticker.symbol}"] / row[f"Close{self.benchmark.symbol}"]
-            )
+            return row[f"Close{self.ticker.symbol}"] / row[f"Close{self.benchmark.symbol}"]
 
         prices[self.series_name] = prices.apply(ratio_formula, axis=1)
         return prices

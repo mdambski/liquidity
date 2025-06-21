@@ -118,9 +118,7 @@ class TestPriceData:
                 "Close": [198.9000, 202.1300],
                 "Volume": [2989594.0, 4750999.0],
             },
-            index=pd.DatetimeIndex(
-                data=pd.to_datetime(["2024-08-29", "2024-08-30"]), name="Date"
-            ),
+            index=pd.DatetimeIndex(data=pd.to_datetime(["2024-08-29", "2024-08-30"]), name="Date"),
         )
 
         pdt.assert_frame_equal(df, expected_df)
@@ -175,9 +173,7 @@ class TestDividendData:
 
         expected_df = pd.DataFrame(
             data={"Dividends": [1.71, 1.67]},
-            index=pd.DatetimeIndex(
-                data=pd.to_datetime(["2024-05-09", "2024-08-09"]), name="Date"
-            ),
+            index=pd.DatetimeIndex(data=pd.to_datetime(["2024-05-09", "2024-08-09"]), name="Date"),
         )
 
         pdt.assert_frame_equal(df, expected_df)

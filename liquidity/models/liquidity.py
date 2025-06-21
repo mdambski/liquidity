@@ -11,30 +11,40 @@ from liquidity.data.providers.fred import FredEconomicDataProvider
 
 class GlobalLiquidity:
     """
-    The Global Liquidity model computes a combined net liquidity index based on key economic indicators from the FRED database.
+    The Global Liquidity model computes a combined net liquidity index based on key economic
+    indicators from the FRED database.
 
     Data Series:
     1. US Federal Reserve Balance Sheet (WALCL):
        - Measures the total assets on the Fed's balance sheet.
-       - Impact: Positive. Increases in Fed assets (e.g., through asset purchases) inject liquidity into the system.
+       - Impact: Positive. Increases in Fed assets (e.g., through asset purchases) inject
+                    liquidity into the system.
 
     2. Reserve Balances with Federal Reserve Banks (WRESBAL):
        - Total reserves held by commercial banks at the Fed.
-       - Impact: Positive. Higher reserve balances indicate more available liquidity for lending and economic activity.
+       - Impact: Positive. Higher reserve balances indicate more available liquidity for
+                    lending and economic activity.
 
     3. Overnight Reverse Repurchase Agreements (RRPONTSYD):
-       - Represents short-term sales of securities by the Fed with an agreement to repurchase them.
-       - Impact: Negative. Reverse repos drain liquidity from the system by temporarily absorbing money.
+       - Represents short-term sales of securities by the Fed with an agreement
+            to repurchase them.
+       - Impact: Negative. Reverse repos drain liquidity from the system by temporarily
+            absorbing money.
 
     4. U.S. Treasury General Account (WTREGEN):
        - The government's account at the Fed used for daily operations.
-       - Impact: Negative. Increases in the TGA reduce liquidity in the financial system as funds are absorbed by the government.
+       - Impact: Negative. Increases in the TGA reduce liquidity in the financial system
+            as funds are absorbed by the government.
 
     Model Description:
-    The liquidity index is computed by summing the contributions of the above components, with positive impacts added and negative impacts subtracted. All data is standardized to billions of USD.
+    The liquidity index is computed by summing the contributions of the above components,
+    with positive impacts added and negative impacts subtracted. All data is standardized
+    to billions of USD.
 
     Visualization:
-    The model includes a stacked area chart showing the individual contributions of each series and the combined liquidity index. The main liquidity index is plotted in red and with a thicker line for clarity.
+    The model includes a stacked area chart showing the individual contributions of each
+    series and the combined liquidity index. The main liquidity index is plotted in red
+    and with a thicker line for clarity.
     """
 
     SERIES_MAPPING = {
@@ -71,16 +81,23 @@ class GlobalLiquidity:
 
         return data.loc[start_date:end_date]  # type: ignore[misc]
 
+    def _get_fred_metadata(self, ticker: str) -> FredEconomicData:
+        metadata = get_symbol_metadata(ticker)
+        if not isinstance(metadata, FredEconomicData):
+            actual_type = type(metadata)
+            raise ValueError(f"Invalid type. Expected FredEcoonomicData, got {actual_type} instead")
+        return metadata
+
     def _fetch_data(self) -> pd.DataFrame:
         """Fetch all required data series and return a combined DataFrame."""
         dfs = []
 
         for name, (ticker, sign) in self.SERIES_MAPPING.items():
             df = self.provider.get_data(ticker)
+            df.rename(columns={"Close": name}, inplace=True)
 
             # Get metadata to check unit
-            metadata = get_symbol_metadata(ticker)
-            df.rename(columns={"Close": name}, inplace=True)
+            metadata = self._get_fred_metadata(ticker)
 
             df = self.ensure_consistent_unit(df, metadata)
 

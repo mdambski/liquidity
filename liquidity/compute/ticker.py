@@ -48,9 +48,7 @@ class Ticker:
         """Returns key for the cache storage and retrieval."""
         return f"{self.symbol}-{data_type}"
 
-    def _get(
-        self, cache_key: str, fetch_fn: Callable[[], pd.DataFrame]
-    ) -> pd.DataFrame:
+    def _get(self, cache_key: str, fetch_fn: Callable[[], pd.DataFrame]) -> pd.DataFrame:
         """Retrieve data from cache or fetch using the provided function."""
         try:
             return self.cache[cache_key]

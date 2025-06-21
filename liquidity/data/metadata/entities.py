@@ -1,5 +1,5 @@
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional
 
@@ -22,9 +22,9 @@ class Metadata:
 
 @dataclass
 class FredEconomicData(Metadata):
-    unit: Optional[str] = None
-    currency: Optional[str] = None
-    type: AssetTypes = AssetTypes.EconomicData
+    unit: str
+    currency: str
+    type: AssetTypes = field(default=AssetTypes.EconomicData, init=False)
 
 
 @dataclass

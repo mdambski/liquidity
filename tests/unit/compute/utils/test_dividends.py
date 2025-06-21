@@ -33,9 +33,7 @@ def div_data():
 
 def test_regular_dividends(div_data):
     expected = div_data[[TTM_DIVIDEND_EXPECTED]]
-    actual = compute_ttm_dividend(
-        df=div_data, dividend_frequency=4, partial_window=True
-    )
+    actual = compute_ttm_dividend(df=div_data, dividend_frequency=4, partial_window=True)
 
     pd.testing.assert_series_equal(
         actual[Fields.TTM_Dividend], expected[TTM_DIVIDEND_EXPECTED], check_names=False

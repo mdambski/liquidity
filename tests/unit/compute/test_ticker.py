@@ -8,9 +8,7 @@ from liquidity.compute.ticker import Ticker
 
 @pytest.fixture
 def price_data():
-    return pd.DataFrame(
-        {"Price": [100, 101, 102]}, index=pd.date_range("2025-01-01", periods=3)
-    )
+    return pd.DataFrame({"Price": [100, 101, 102]}, index=pd.date_range("2025-01-01", periods=3))
 
 
 @pytest.fixture
@@ -29,9 +27,7 @@ def treasury_yield_data():
 
 @pytest.fixture
 def yield_data():
-    return pd.DataFrame(
-        {"Yield": [0.2, 0.3, 0.4]}, index=pd.date_range("2024-01-01", periods=3)
-    )
+    return pd.DataFrame({"Yield": [0.2, 0.3, 0.4]}, index=pd.date_range("2024-01-01", periods=3))
 
 
 @pytest.fixture
@@ -94,9 +90,7 @@ class TestTicker:
         mock_provider.get_prices.assert_called_once_with(ticker.symbol)
         pd.testing.assert_frame_equal(df, price_data)
 
-    def test_dividends_property(
-        self, ticker, dividend_data, mock_metadata, compute_dividend_mock
-    ):
+    def test_dividends_property(self, ticker, dividend_data, mock_metadata, compute_dividend_mock):
         df = ticker.dividends
 
         compute_dividend_mock.assert_called_once_with(

@@ -77,9 +77,7 @@ class YieldSpread:
         )
 
         def spread_formula(row):
-            return (
-                row[f"Yield{self.ticker.symbol}"] - row[f"Yield{self.benchmark.symbol}"]
-            )
+            return row[f"Yield{self.ticker.symbol}"] - row[f"Yield{self.benchmark.symbol}"]
 
         yields[self.series_name] = yields.apply(spread_formula, axis=1)
         return yields
@@ -96,9 +94,7 @@ class YieldSpread:
         """
         secondary_series = None
         if show_all_series:
-            secondary_series = [
-                col for col in self.df.columns if col != self.series_name
-            ]
+            secondary_series = [col for col in self.df.columns if col != self.series_name]
 
         return Chart(
             data=self.df,
