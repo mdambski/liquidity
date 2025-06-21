@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "liquidity"
-version = "0.2.2"
+version = "0.3.0"
 description = "Market liquidity proxies"
 authors = ["Marcin Dąmbski"]
 license = "MIT"
