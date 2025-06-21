@@ -55,8 +55,6 @@ Below are some example code snippets:
 
 **Example 1: Generate liquidity model**
 
-To generate the model using all available data:
-
 ```python
 from liquidity.models.liquidity import GlobalLiquidity
 
@@ -64,7 +62,7 @@ model = GlobalLiquidity()
 model.show()
 ```
 
-The code will retrieve data using the FRED Economi database API, and generate the liquidity chart. Below example of generated chart:
+The code will retrieve data using the FRED Economic database API, and generate the liquidity chart. Below example of generated chart:
 ![Liquidity proxies](examples/global-liquidity-model.png)
 
 To generate the model for a specific date range:
