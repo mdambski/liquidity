@@ -6,6 +6,8 @@ from pydantic import Field
 from pydantic_settings import BaseSettings
 
 from liquidity.compute.cache import cache_with_persistence
+from liquidity.data.metadata.assets import get_symbol_metadata
+from liquidity.data.metadata.entities import FredEconomicData
 
 
 class FredConfig(BaseSettings):
@@ -24,3 +26,9 @@ class FredEconomicDataProvider:
         df = pd.DataFrame(data, columns=["Close"])
         df.index.name = "Date"
         return df
+
+    def get_metadata(self, ticker: str) -> FredEconomicData:
+        metadata = get_symbol_metadata(ticker)
+        if not isinstance(metadata, FredEconomicData):
+            raise ValueError(f"Expected FredEconomicData, got {type(metadata)} for {ticker}")
+        return metadata

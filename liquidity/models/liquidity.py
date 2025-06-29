@@ -1,10 +1,10 @@
 from datetime import datetime
+from functools import cached_property
 from typing import Dict, Optional, Tuple
 
 import pandas as pd
 import plotly.graph_objects as go  # type: ignore
 
-from liquidity.data.metadata.assets import get_symbol_metadata
 from liquidity.data.metadata.entities import FredEconomicData
 from liquidity.data.providers.fred import FredEconomicDataProvider
 
@@ -78,35 +78,30 @@ class GlobalLiquidity:
         "Trillions": 1e3,
     }
 
-    def __init__(self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None):
-        self.provider = FredEconomicDataProvider()
+    def __init__(
+        self,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        provider: Optional[FredEconomicDataProvider] = None,
+    ):
+        self.provider = provider or FredEconomicDataProvider()
         self.start_date = pd.Timestamp(start_date) if start_date else None
         self.end_date = pd.Timestamp(end_date) if end_date else None
-        self.data = self._load_data()
 
-    def _load_data(self) -> pd.DataFrame:
-        """
-        Fetches and processes all configured FRED data series.
-        Returns:
-            pd.DataFrame: Combined, signed, and standardized data.
-        """
+    @cached_property
+    def raw_data(self) -> pd.DataFrame:
+        """Fetches and processes all configured FRED data series."""
         processed_series = []
 
         for name, (ticker, sign) in self.SERIES_MAPPING.items():
             df = self.provider.get_data(ticker).rename(columns={"Close": name})
-            metadata = self._validate_and_get_metadata(ticker)
+            metadata = self.provider.get_metadata(ticker)
             df = self._standardize_series(df, name, metadata)
             df[name] *= sign
             processed_series.append(self._filter_date_range(df))
 
         combined = pd.concat(processed_series, axis=1).ffill().dropna()
         return combined
-
-    def _validate_and_get_metadata(self, ticker: str) -> FredEconomicData:
-        metadata = get_symbol_metadata(ticker)
-        if not isinstance(metadata, FredEconomicData):
-            raise ValueError(f"Expected FredEconomicData, got {type(metadata)} for {ticker}")
-        return metadata
 
     def _standardize_series(
         self, df: pd.DataFrame, column: str, metadata: FredEconomicData
@@ -157,24 +152,27 @@ class GlobalLiquidity:
         Returns:
             pd.DataFrame: Original series + computed 'Liquidity Index' column.
         """
-        df = self.data.copy()
+        df = self.raw_data.copy()
         df["Liquidity Index"] = df.sum(axis=1)
         return df
+
+    @cached_property
+    def df(self) -> pd.DataFrame:
+        """Returns the complete liquidity data with computed index."""
+        return self.liquidity_index
 
     def show(self):
         """Plot stacked area chart of liquidity components along with
         the combined liquidity index.
         """
-        df = self.liquidity_index
-
         fig = go.Figure()
 
         # Stacked area chart for components
         for column in self.SERIES_MAPPING.keys():
             fig.add_trace(
                 go.Scatter(
-                    x=df.index,
-                    y=df[column],
+                    x=self.df.index,
+                    y=self.df[column],
                     mode="lines",
                     stackgroup="one",
                     name=column,
@@ -185,8 +183,8 @@ class GlobalLiquidity:
         # Main liquidity index with red color and thicker line
         fig.add_trace(
             go.Scatter(
-                x=df.index,
-                y=df["Liquidity Index"],
+                x=self.df.index,
+                y=self.df["Liquidity Index"],
                 mode="lines",
                 name="Liquidity Index",
                 line=dict(width=3, color="black"),
