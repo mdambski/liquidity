@@ -106,7 +106,8 @@ class GlobalLiquidity:
     def _standardize_series(
         self, df: pd.DataFrame, column: str, metadata: FredEconomicData
     ) -> pd.DataFrame:
-        df = self._convert_currency(df, column, metadata.currency, "USD")
+        """Converts series to common format by converting units and currency to Billions of USD."""
+        df = self._convert_currency(df, column, currency_from=metadata.currency, currency_to="USD")
         df[column] *= self.UNIT_CONVERSION_FACTORS.get(metadata.unit, 1)
         return df
 

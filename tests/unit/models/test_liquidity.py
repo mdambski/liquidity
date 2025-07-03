@@ -96,3 +96,129 @@ def test_liquidity_index_calculation(
     assert all(np.isclose(liquidity_series.values, expected_liquidity)), (
         f"Liquidity Index was {liquidity_series.values}, " f"expected {expected_liquidity}"
     )
+
+
+@pytest.fixture
+def dummy_eur_series():
+    """
+    Provides a dummy EUR-denominated time series.
+    """
+    dates = pd.date_range(start="2020-01-01", periods=5, freq="W")
+    data = pd.DataFrame(
+        {"Close": [10, 20, 30, 40, 50]},
+        index=dates,
+    )
+    return data
+
+
+def get_fx_series(exchange_rate, dates):
+    """
+    Provides a dummy exchange rate.
+    """
+    data = pd.DataFrame(
+        {"Close": [exchange_rate] * len(dates)},
+        index=dates,
+    )
+    return data
+
+
+@pytest.mark.parametrize(
+    "currency_from, unit_from, fx_ticker, fx_rate, input_values, expected_values",
+    [
+        # Case 1: USD, different unit (Millions -> Billions)
+        (
+            "USD",
+            "Millions",
+            None,
+            None,
+            [1000, 2000, 3000, 4000, 5000],  # Millions
+            [1.0, 2.0, 3.0, 4.0, 5.0],  # Billions
+        ),
+        # Case 2: USD, different unit (Trillions -> Billions)
+        (
+            "USD",
+            "Trillions",
+            None,
+            None,
+            [1.0, 2.0, 3.0, 4.0, 5.0],  # Trillions
+            [1000, 2000, 3000, 4000, 5000],  # Billions
+        ),
+        # Case 2: EUR, same unit (Billions)
+        (
+            "EUR",
+            "Billions",
+            "DEXUSEU",
+            1.2,
+            [10, 20, 30, 40, 50],
+            [12.0, 24.0, 36.0, 48.0, 60.0],  # EUR * 1.2 -> USD
+        ),
+        # Case 3: JPY, different unit (Trillions -> Billions)
+        (
+            "JPY",
+            "Trillions",
+            "DEXJPUS",
+            150.0,
+            [2, 4, 6, 8, 10],  # trillions JPY
+            [
+                2_000 / 150.0,
+                4_000 / 150.0,
+                6_000 / 150.0,
+                8_000 / 150.0,
+                10_000 / 150.0,
+            ],  # trillions JPY -> billions USD
+        ),
+    ],
+)
+def test_standardize_series(
+    mock_provider,
+    dummy_eur_series,
+    currency_from,
+    unit_from,
+    fx_ticker,
+    fx_rate,
+    input_values,
+    expected_values,
+):
+    """
+    Tests _standardize_series for:
+    - unit conversion (Millions, Trillions)
+    - currency conversion (EUR->USD, JPY->USD)
+    """
+
+    # Prepare dummy data with given input values
+    dates = dummy_eur_series.index
+
+    input_series = pd.DataFrame({"Close": input_values}, index=dates)
+
+    def get_data_side_effect(ticker):
+        if ticker == fx_ticker:
+            return get_fx_series(fx_rate, dates)
+        raise ValueError(f"Unexpected ticker: {ticker}")
+
+    mock_provider.get_data.side_effect = get_data_side_effect
+
+    # Metadata
+    mock_provider.get_metadata.return_value = FredEconomicData(
+        ticker=fx_ticker,
+        name=fx_ticker,
+        unit=unit_from,
+        currency=currency_from,
+    )
+
+    # Instantiate the model
+    gl = GlobalLiquidity(provider=mock_provider)
+
+    # Call _standardize_series
+    standardized = gl._standardize_series(
+        input_series.copy(),
+        column="Close",
+        metadata=mock_provider.get_metadata.return_value,
+    )
+
+    # Check values
+    pd.testing.assert_series_equal(
+        standardized["Close"],
+        pd.Series(expected_values, index=dates),
+        check_names=False,
+        check_dtype=False,
+    )
