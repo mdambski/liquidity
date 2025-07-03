@@ -1,3 +1,4 @@
+from collections import namedtuple
 from unittest import mock
 
 import numpy as np
@@ -6,10 +7,6 @@ import pytest
 
 from liquidity.data.metadata.entities import FredEconomicData
 from liquidity.models.liquidity import GlobalLiquidity
-
-# ---------------------------------------------------------
-# Fixtures to mock FredEconomicDataProvider
-# ---------------------------------------------------------
 
 
 @pytest.fixture
@@ -33,47 +30,106 @@ def mock_provider():
     return provider
 
 
+@pytest.fixture
+def liquidity_dates():
+    """
+    Provides a fixed date range for liquidity tests.
+    """
+    return pd.date_range(start="2020-01-01", periods=3, freq="W")
+
+
+@pytest.fixture
+def liquidity_series_factory(liquidity_dates):
+    """
+    Returns a function to create a constant time series DataFrame.
+    """
+
+    def _make(value):
+        return pd.DataFrame(
+            {"Close": np.full(len(liquidity_dates), value)},
+            index=liquidity_dates,
+        )
+
+    return _make
+
+
+LiquidityTestCase = namedtuple(
+    "LiquidityTestCase",
+    ["ecb", "walcl", "wresbal", "rrpon", "wtregen", "expected_liquidity", "description"],
+)
+
+LIQUIDITY_TEST_CASES = [
+    LiquidityTestCase(
+        ecb=0,
+        walcl=0,
+        wresbal=0,
+        rrpon=0,
+        wtregen=0,
+        expected_liquidity=0,
+        description="All zeros",
+    ),
+    LiquidityTestCase(
+        ecb=10,
+        walcl=20,
+        wresbal=30,
+        rrpon=0,
+        wtregen=0,
+        expected_liquidity=60,
+        description="Only positive series active",
+    ),
+    LiquidityTestCase(
+        ecb=0,
+        walcl=0,
+        wresbal=0,
+        rrpon=40,
+        wtregen=50,
+        expected_liquidity=-90,
+        description="Only negative series active",
+    ),
+    LiquidityTestCase(
+        ecb=5,
+        walcl=15,
+        wresbal=25,
+        rrpon=10,
+        wtregen=20,
+        expected_liquidity=15,
+        description="Mix of positives and negatives",
+    ),
+    LiquidityTestCase(
+        ecb=100,
+        walcl=200,
+        wresbal=300,
+        rrpon=150,
+        wtregen=250,
+        expected_liquidity=200,
+        description="Big positives vs big negatives",
+    ),
+]
+
+
 @pytest.mark.parametrize(
-    "ecb, walcl, wresbal, rrpon, wtregen, expected_liquidity",
-    [
-        # Scenario 1: all zeros
-        (0, 0, 0, 0, 0, 0),
-        # Scenario 2: only positive series active
-        (10, 20, 30, 0, 0, 60),
-        # Scenario 3: only negative series active
-        (0, 0, 0, 40, 50, -90),
-        # Scenario 4: mix of positives and negatives
-        (5, 15, 25, 10, 20, 15),
-        # Scenario 5: big positives vs big negatives
-        (100, 200, 300, 150, 250, 200),
-    ],
+    "case",
+    LIQUIDITY_TEST_CASES,
+    ids=[c.description for c in LIQUIDITY_TEST_CASES],
 )
 def test_liquidity_index_calculation(
     mock_provider,
-    ecb,
-    walcl,
-    wresbal,
-    rrpon,
-    wtregen,
-    expected_liquidity,
+    liquidity_dates,
+    liquidity_series_factory,
+    case,
 ):
     """
     Tests that GlobalLiquidity correctly sums positive and negative series
-    across various scenarios.
+    across different scenarios.
     """
 
-    # Create dummy timeseries for all series
-    dates = pd.date_range(start="2020-01-01", periods=3, freq="W")
-
-    def make_series(value):
-        return pd.DataFrame({"Close": np.full(3, value)}, index=dates)
-
+    # Create dummy timeseries for each ticker
     series_mapping = {
-        "ECBASSETSW": make_series(ecb),
-        "WALCL": make_series(walcl),
-        "WRESBAL": make_series(wresbal),
-        "RRPONTSYD": make_series(rrpon),
-        "WTREGEN": make_series(wtregen),
+        "ECBASSETSW": liquidity_series_factory(case.ecb),
+        "WALCL": liquidity_series_factory(case.walcl),
+        "WRESBAL": liquidity_series_factory(case.wresbal),
+        "RRPONTSYD": liquidity_series_factory(case.rrpon),
+        "WTREGEN": liquidity_series_factory(case.wtregen),
     }
 
     def get_data(ticker):
@@ -83,142 +139,160 @@ def test_liquidity_index_calculation(
 
     # Initialize the model
     model = GlobalLiquidity(
-        start_date=dates[0],
-        end_date=dates[-1],
+        start_date=liquidity_dates[0],
+        end_date=liquidity_dates[-1],
         provider=mock_provider,
     )
 
-    df = model.df
+    # Extract the Liquidity Index
+    liquidity_series = model.df["Liquidity Index"]
 
-    liquidity_series = df["Liquidity Index"]
-
-    # Check all values in Liquidity Index equal expected_liquidity
-    assert all(np.isclose(liquidity_series.values, expected_liquidity)), (
-        f"Liquidity Index was {liquidity_series.values}, " f"expected {expected_liquidity}"
+    # Assert all values match the expected liquidity
+    assert all(np.isclose(liquidity_series.values, case.expected_liquidity)), (
+        f"Liquidity Index was {liquidity_series.values}, " f"expected {case.expected_liquidity}"
     )
 
 
 @pytest.fixture
-def dummy_eur_series():
-    """
-    Provides a dummy EUR-denominated time series.
-    """
-    dates = pd.date_range(start="2020-01-01", periods=5, freq="W")
-    data = pd.DataFrame(
+def dates():
+    return pd.date_range(start="2020-01-01", periods=5, freq="W")
+
+
+@pytest.fixture
+def dummy_eur_series(dates):
+    return pd.DataFrame(
         {"Close": [10, 20, 30, 40, 50]},
         index=dates,
     )
-    return data
 
 
-def get_fx_series(exchange_rate, dates):
-    """
-    Provides a dummy exchange rate.
-    """
-    data = pd.DataFrame(
-        {"Close": [exchange_rate] * len(dates)},
-        index=dates,
-    )
-    return data
+@pytest.fixture
+def fx_series_factory():
+    def _factory(rate, dates):
+        return pd.DataFrame(
+            {"Close": [rate] * len(dates)},
+            index=dates,
+        )
+
+    return _factory
 
 
-@pytest.mark.parametrize(
-    "currency_from, unit_from, fx_ticker, fx_rate, input_values, expected_values",
+TestCase = namedtuple(
+    "TestCase",
     [
-        # Case 1: USD, different unit (Millions -> Billions)
-        (
-            "USD",
-            "Millions",
-            None,
-            None,
-            [1000, 2000, 3000, 4000, 5000],  # Millions
-            [1.0, 2.0, 3.0, 4.0, 5.0],  # Billions
-        ),
-        # Case 2: USD, different unit (Trillions -> Billions)
-        (
-            "USD",
-            "Trillions",
-            None,
-            None,
-            [1.0, 2.0, 3.0, 4.0, 5.0],  # Trillions
-            [1000, 2000, 3000, 4000, 5000],  # Billions
-        ),
-        # Case 2: EUR, same unit (Billions)
-        (
-            "EUR",
-            "Billions",
-            "DEXUSEU",
-            1.2,
-            [10, 20, 30, 40, 50],
-            [12.0, 24.0, 36.0, 48.0, 60.0],  # EUR * 1.2 -> USD
-        ),
-        # Case 3: JPY, different unit (Trillions -> Billions)
-        (
-            "JPY",
-            "Trillions",
-            "DEXJPUS",
-            150.0,
-            [2, 4, 6, 8, 10],  # trillions JPY
-            [
-                2_000 / 150.0,
-                4_000 / 150.0,
-                6_000 / 150.0,
-                8_000 / 150.0,
-                10_000 / 150.0,
-            ],  # trillions JPY -> billions USD
-        ),
+        "currency_from",
+        "unit_from",
+        "fx_ticker",
+        "fx_rate",
+        "input_values",
+        "expected_values",
+        "description",
     ],
 )
+
+TEST_CASES = [
+    TestCase(
+        currency_from="USD",
+        unit_from="Millions",
+        fx_ticker=None,
+        fx_rate=None,
+        input_values=[1000, 2000, 3000, 4000, 5000],
+        expected_values=[1.0, 2.0, 3.0, 4.0, 5.0],
+        description="USD, Millions -> Billions",
+    ),
+    TestCase(
+        currency_from="USD",
+        unit_from="Trillions",
+        fx_ticker=None,
+        fx_rate=None,
+        input_values=[1.0, 2.0, 3.0, 4.0, 5.0],
+        expected_values=[1000, 2000, 3000, 4000, 5000],
+        description="USD, Trillions -> Billions",
+    ),
+    TestCase(
+        currency_from="EUR",
+        unit_from="Billions",
+        fx_ticker="DEXUSEU",
+        fx_rate=1.2,
+        input_values=[10, 20, 30, 40, 50],
+        expected_values=[12.0, 24.0, 36.0, 48.0, 60.0],
+        description="EUR, Billions -> USD",
+    ),
+    TestCase(
+        currency_from="JPY",
+        unit_from="Trillions",
+        fx_ticker="DEXJPUS",
+        fx_rate=150.0,
+        input_values=[2, 4, 6, 8, 10],
+        expected_values=[
+            2000 / 150.0,
+            4000 / 150.0,
+            6000 / 150.0,
+            8000 / 150.0,
+            10000 / 150.0,
+        ],
+        description="JPY, Trillions -> Billions USD",
+    ),
+]
+
+
+@pytest.mark.parametrize("case", TEST_CASES, ids=[c.description for c in TEST_CASES])
 def test_standardize_series(
     mock_provider,
     dummy_eur_series,
-    currency_from,
-    unit_from,
-    fx_ticker,
-    fx_rate,
-    input_values,
-    expected_values,
+    fx_series_factory,
+    dates,
+    case,
 ):
     """
-    Tests _standardize_series for:
-    - unit conversion (Millions, Trillions)
-    - currency conversion (EUR->USD, JPY->USD)
+    Test _standardize_series for:
+    - unit conversion (e.g. Millions -> Billions, Trillions -> Billions)
+    - currency conversion via FX rates
     """
 
-    # Prepare dummy data with given input values
-    dates = dummy_eur_series.index
-
-    input_series = pd.DataFrame({"Close": input_values}, index=dates)
-
-    def get_data_side_effect(ticker):
-        if ticker == fx_ticker:
-            return get_fx_series(fx_rate, dates)
-        raise ValueError(f"Unexpected ticker: {ticker}")
-
-    mock_provider.get_data.side_effect = get_data_side_effect
-
-    # Metadata
-    mock_provider.get_metadata.return_value = FredEconomicData(
-        ticker=fx_ticker,
-        name=fx_ticker,
-        unit=unit_from,
-        currency=currency_from,
+    # Create input series with specified values
+    input_series = pd.DataFrame(
+        {"Close": case.input_values},
+        index=dates,
     )
 
-    # Instantiate the model
+    # Prepare FX side-effect if applicable
+    if case.fx_ticker:
+
+        def side_effect(ticker):
+            if ticker == case.fx_ticker:
+                return fx_series_factory(case.fx_rate, dates)
+            else:
+                pytest.fail(f"Unexpected ticker requested: {ticker}")
+
+        mock_provider.get_data.side_effect = side_effect
+    else:
+        mock_provider.get_data.side_effect = None
+
+    # Prepare metadata
+    metadata = FredEconomicData(
+        ticker=case.fx_ticker,
+        name=case.fx_ticker,
+        unit=case.unit_from,
+        currency=case.currency_from,
+    )
+
+    mock_provider.get_metadata.return_value = metadata
+
+    # Instantiate GlobalLiquidity model
     gl = GlobalLiquidity(provider=mock_provider)
 
-    # Call _standardize_series
+    # Perform standardization
     standardized = gl._standardize_series(
         input_series.copy(),
         column="Close",
-        metadata=mock_provider.get_metadata.return_value,
+        metadata=metadata,
     )
 
-    # Check values
+    # Assert the output values
     pd.testing.assert_series_equal(
         standardized["Close"],
-        pd.Series(expected_values, index=dates),
+        pd.Series(case.expected_values, index=dates),
         check_names=False,
         check_dtype=False,
     )
