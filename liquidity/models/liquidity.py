@@ -132,11 +132,14 @@ class GlobalLiquidity:
                 f"Currency conversion from {currency_from} to {currency_to} not supported"
             )
 
-        # Align and multiply with FX rate
-        df = df.copy()
-        df["fx"] = fx_rate.ffill()
-        df[column] = df[column] / df["fx"]
-        return df.drop(columns="fx")
+        # Align FX rates to the data by exact dates only
+        aligned_fx = fx_rate[df.index.intersection(fx_rate.index)]
+
+        # Reduce data to matching dates only
+        df = df.loc[aligned_fx.index].copy()
+        df[column] = df[column] / aligned_fx
+
+        return df
 
     def _filter_date_range(self, df: pd.DataFrame) -> pd.DataFrame:
         if not isinstance(df.index, pd.DatetimeIndex):

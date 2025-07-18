@@ -169,10 +169,8 @@ def dummy_eur_series(dates):
 @pytest.fixture
 def fx_series_factory():
     def _factory(rate, dates):
-        return pd.DataFrame(
-            {"Close": [rate] * len(dates)},
-            index=dates,
-        )
+        rates = rate if isinstance(rate, list) else [rate] * len(dates)
+        return pd.DataFrame({"Close": rates}, index=dates)
 
     return _factory
 
@@ -296,3 +294,45 @@ def test_standardize_series(
         check_names=False,
         check_dtype=False,
     )
+
+
+def test_currency_conversion_with_misaligned_dates(mock_provider, fx_series_factory, dates):
+    """
+    Verify currency conversion aligns FX rates by date and drops missing.
+    """
+
+    # Main data: denominated in EUR with weekly intervals
+    data_series = pd.DataFrame({"Close": [10, 20, 30, 40, 50]}, index=dates)
+
+    # FX series with EUR/USD daily rates, some points
+    # are before and some after the weekly datapoints
+    # only two overlap.
+    fx_series = pd.DataFrame(
+        {"Close": [1.0, 1.1, 1.2, 1.3]},
+        index=pd.DatetimeIndex(
+            [
+                dates[0] - pd.Timedelta(days=1),
+                dates[0],
+                dates[1],
+                dates[1] + pd.Timedelta(days=1),
+            ]
+        ),
+    )
+
+    # Setup mocks and metadata
+    mock_provider.get_data.return_value = fx_series
+    metadata = FredEconomicData(
+        ticker="TEST_EUR_SERIES",
+        name="EUR Series",
+        unit="Billions",
+        currency="EUR",  # currency_from
+    )
+    mock_provider.get_metadata.return_value = metadata
+
+    # Run standardization logic
+    gl = GlobalLiquidity(provider=mock_provider)
+    actual = gl._standardize_series(data_series.copy(), "Close", metadata)
+
+    # Evaluate the result
+    expected = pd.Series([11.0, 24.0], index=[dates[0], dates[1]])
+    pd.testing.assert_series_equal(actual["Close"], expected, check_names=False)
