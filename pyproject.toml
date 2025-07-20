@@ -35,10 +35,34 @@ line-length = 100
 
 [tool.ruff.lint]
 select = [
-    # pycodestyle
-    "E",
-    # Pyflakes
-    "F",
-    # isort
-    "I",
+  "E",    # pycodestyle
+  "F",    # pyflakes
+  "I",    # isort
+  "ANN",  # flake8-annotations
+  "D"     # pydoc style rules
 ]
+
+ignore = [
+  "D107",    # allow missing docstring in __init__
+  "D203",    # incompatible with D211 (no-blank-line-before-class)
+  "D213",    # incompatible with D212 (multi-line-summary-first-line)
+]
+
+
+[tool.mypy]
+python_version = 3.11
+strict = true
+warn_unused_configs = true
+# Ensure no untyped defs slip in
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+disallow_untyped_decorators = true
+disallow_subclassing_any = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+
+# Exclude test files
+exclude = "tests/.*"

@@ -6,6 +6,7 @@ tasks:
     cmds:
       - poetry run ruff check --fix-only
       - poetry run ruff format .
+      - poetry run mypy . --pretty --strict
 
   lint:
     desc: Run Ruff in check mode and MyPy
@@ -13,11 +14,7 @@ tasks:
     cmds:
       - poetry run ruff check
       - poetry run ruff format . --check
-
-  mypy:
-    desc: Run MyPy type checking
-    cmds:
-      - poetry run mypy .
+      - poetry run mypy . --pretty --strict
 
   test:
     desc: Run unit tests with coverage
