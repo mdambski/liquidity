@@ -8,11 +8,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     environment: ci-approval
-
-    strategy:
-      matrix:
-        python-version: [ "3.9", "3.10", "3.11"]
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
