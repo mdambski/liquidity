@@ -1,3 +1,6 @@
+[![codecov](https://codecov.io/gh/mdambski/liquidity/branch/master/graph/badge.svg)](https://codecov.io/gh/mdambski/liquidity/tree/master)
+
+
 # Market Liquidity Proxies
 
 This repository provides an overview of key market liquidity proxies and additional alternatives for crypto, bond, and stock markets. These proxies serve as indicators of market sentiment, risk appetite, and liquidity conditions.
