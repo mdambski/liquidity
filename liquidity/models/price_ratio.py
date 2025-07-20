@@ -80,7 +80,7 @@ class PriceRatio:
             rsuffix=self.benchmark.symbol,
         ).dropna()
 
-        def ratio_formula(row: pd.Series[np.float64]) -> np.float64:
+        def ratio_formula(row: pd.Series) -> pd.Series:
             return row[f"Close{self.ticker.symbol}"] / row[f"Close{self.benchmark.symbol}"]
 
         prices[self.series_name] = prices.apply(ratio_formula, axis=1)
