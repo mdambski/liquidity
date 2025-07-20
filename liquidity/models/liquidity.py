@@ -10,8 +10,7 @@ from liquidity.data.providers.fred import FredEconomicDataProvider
 
 
 class GlobalLiquidity:
-    """
-    The Global Liquidity model estimates net financial system liquidity using key
+    """The Global Liquidity model estimates net financial system liquidity using key
     macroeconomic indicators from the FRED database. It captures how central banks and fiscal
     authorities inject or withdraw liquidity from markets.
 
@@ -57,6 +56,7 @@ class GlobalLiquidity:
     --------
     >>> model = GlobalLiquidity(start_date=datetime(2020, 1, 1))
     >>> model.show()
+
     """
 
     SERIES_MAPPING: Dict[str, Tuple[str, int]] = {
@@ -83,14 +83,14 @@ class GlobalLiquidity:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         provider: Optional[FredEconomicDataProvider] = None,
-    ):
+    ) -> None:
         self.provider = provider or FredEconomicDataProvider()
         self.start_date = pd.Timestamp(start_date) if start_date else None
         self.end_date = pd.Timestamp(end_date) if end_date else None
 
     @cached_property
     def raw_data(self) -> pd.DataFrame:
-        """Fetches and processes all configured FRED data series."""
+        """Fetch and process all configured FRED data series."""
         processed_series = []
 
         for name, (ticker, sign) in self.SERIES_MAPPING.items():
@@ -106,7 +106,7 @@ class GlobalLiquidity:
     def _standardize_series(
         self, df: pd.DataFrame, column: str, metadata: FredEconomicData
     ) -> pd.DataFrame:
-        """Converts series to common format by converting units and currency to Billions of USD."""
+        """Convert series to common format by converting units and currency to Billions of USD."""
         df = self._convert_currency(df, column, currency_from=metadata.currency, currency_to="USD")
         df[column] *= self.UNIT_CONVERSION_FACTORS.get(metadata.unit, 1)
         return df
@@ -147,14 +147,15 @@ class GlobalLiquidity:
 
         start = self.start_date or df.index.min()
         end = self.end_date or df.index.max()
-        return df.loc[start:end]  # type: ignore[misc]
+        return df.loc[start:end]
 
     @property
     def liquidity_index(self) -> pd.DataFrame:
-        """
-        Computes the total net liquidity index.
+        """Computes the total net liquidity index.
+
         Returns:
             pd.DataFrame: Original series + computed 'Liquidity Index' column.
+
         """
         df = self.raw_data.copy()
         df["Liquidity Index"] = df.sum(axis=1)
@@ -165,7 +166,7 @@ class GlobalLiquidity:
         """Returns the complete liquidity data with computed index."""
         return self.liquidity_index
 
-    def show(self):
+    def show(self) -> None:
         """Plot stacked area chart of liquidity components along with
         the combined liquidity index.
         """

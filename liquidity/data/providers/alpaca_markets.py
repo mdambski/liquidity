@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, cast
 
 import pandas as pd
-from alpaca.data import CryptoBarsRequest, CryptoHistoricalDataClient, TimeFrame
+from alpaca.data import BarSet, CryptoBarsRequest, CryptoHistoricalDataClient, TimeFrame
 from dateutil.relativedelta import relativedelta
 
 from liquidity.data.format import formatter_factory
@@ -11,12 +11,11 @@ from liquidity.data.providers.base import DataProviderBase
 
 
 class AlpacaCryptoDataProvider(DataProviderBase):
-    """
-    A data provider class to fetch and format cryptocurrency price data
+    """A data provider class to fetch and format cryptocurrency price data
     using Alpaca's CryptoHistoricalDataClient.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = CryptoHistoricalDataClient()
 
     def get_prices(
@@ -25,8 +24,7 @@ class AlpacaCryptoDataProvider(DataProviderBase):
         start: Optional[datetime] = None,
         end: Optional[datetime] = None,
     ) -> pd.DataFrame:
-        """
-        Fetch and format historical price data for a given cryptocurrency ticker.
+        """Fetch and format historical price data for a given cryptocurrency ticker.
 
         Args:
             ticker (str): The cryptocurrency ticker (e.g., "BTC/USD").
@@ -38,6 +36,7 @@ class AlpacaCryptoDataProvider(DataProviderBase):
         Returns:
             pd.DataFrame: A DataFrame containing the formatted price data, with the
             index as timestamps and columns named after OHLCV fields.
+
         """
         df = self._get_raw_data(
             ticker=f"{ticker}/USD",
@@ -52,8 +51,7 @@ class AlpacaCryptoDataProvider(DataProviderBase):
         start: Optional[datetime] = None,
         end: Optional[datetime] = None,
     ) -> pd.DataFrame:
-        """
-        Fetch raw historical price data for a cryptocurrency ticker.
+        """Fetch raw historical price data for a cryptocurrency ticker.
 
         Args:
             ticker (str): The cryptocurrency ticker (e.g., "BTC/USD").
@@ -61,6 +59,7 @@ class AlpacaCryptoDataProvider(DataProviderBase):
 
         Returns:
             pd.DataFrame: A DataFrame containing the raw price data.
+
         """
         request_params = CryptoBarsRequest(
             symbol_or_symbols=ticker,
@@ -68,11 +67,11 @@ class AlpacaCryptoDataProvider(DataProviderBase):
             start=start,
             end=end,
         )
-        return self.client.get_crypto_bars(request_params).df
+        result = cast(BarSet, self.client.get_crypto_bars(request_params))
+        return result.df
 
     def _format_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Format the raw dataframe fetched from the Alpaca API to the project's
+        """Format the raw dataframe fetched from the Alpaca API to the project's
         common format.
 
         This method performs the necessary transformations on the DataFrame,
@@ -88,8 +87,8 @@ class AlpacaCryptoDataProvider(DataProviderBase):
 
         Returns:
             pd.DataFrame: The formatted DataFrame, adjusted to meet the project format.
-        """
 
+        """
         # Alpaca uses MultiIndex (ticker, timestamp). Extract the 'timestamp' index
         # from the raw dataframe and convert it into a DatetimeIndex.
         timestamp_index = pd.DatetimeIndex(df.index.get_level_values("timestamp"))

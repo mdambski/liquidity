@@ -27,9 +27,8 @@ class AlphaVantageDataProvider(DataProviderBase):
         self.api_key = api_key or AlphaVantageConfig().api_key
         self.output_format = "pandas"
 
-    def get_prices(self, ticker, output_size: str = "full") -> pd.DataFrame:
-        """
-        Fetches daily price data for a given ticker symbol.
+    def get_prices(self, ticker: str, output_size: str = "full") -> pd.DataFrame:
+        """Fetches daily price data for a given ticker symbol.
 
         Args:
             ticker (str): The stock symbol (ticker) for which to retrieve price data.
@@ -40,6 +39,7 @@ class AlphaVantageDataProvider(DataProviderBase):
 
         Returns:
             pd.DataFrame: A DataFrame containing the formatted OHLCV price data.
+
         """
         client = TimeSeries(key=self.api_key, output_format="pandas")
         df, _ = client.get_daily(ticker, outputsize=output_size)
@@ -56,14 +56,14 @@ class AlphaVantageDataProvider(DataProviderBase):
         return av_prices_formatter(df)
 
     def get_dividends(self, ticker: str) -> pd.DataFrame:
-        """
-        Fetches dividend data for a given ticker symbol.
+        """Fetches dividend data for a given ticker symbol.
 
         Args:
             ticker (str): The stock symbol (ticker) for which to retrieve dividend data.
 
         Returns:
             pd.DataFrame: A DataFrame containing the formatted dividend data.
+
         """
         client = FundamentalData(key=self.api_key, output_format="pandas")
         df, _ = client.get_dividends(ticker)
@@ -79,8 +79,7 @@ class AlphaVantageDataProvider(DataProviderBase):
         return av_dividend_formatter(df)
 
     def get_treasury_yield(self, maturity: Optional[str] = "10year") -> pd.DataFrame:
-        """
-        Fetches treasury yield data for a specified maturity period.
+        """Fetches treasury yield data for a specified maturity period.
 
         Args:
             maturity (str): The maturity period for the treasury yield.
@@ -89,6 +88,7 @@ class AlphaVantageDataProvider(DataProviderBase):
 
         Returns:
             pd.DataFrame: A DataFrame containing the formatted treasury yield data.
+
         """
         client = EconIndicators(self.api_key, output_format="pandas")
         df, _ = client.get_treasury_yield(maturity=maturity, interval="weekly")

@@ -45,9 +45,7 @@ def chart_json_path(unittest_fixtures_dir):
 
 @pytest.fixture
 def expected_chart_json(chart_json_path, generate_fixture, generated_chart):
-    """
-    Fixture to load the expected chart JSON or generate it based on a runtime parameter.
-    """
+    """Fixture to load the expected chart JSON or generate it based on a runtime parameter."""
     if generate_fixture:
         with open(chart_json_path, "w") as f:
             json.dump(generated_chart, f, indent=4)
@@ -59,8 +57,7 @@ def expected_chart_json(chart_json_path, generate_fixture, generated_chart):
 
 
 def test_generated_figure_matches_json(expected_chart_json, generated_chart):
-    """
-    Test that the generated chart matches the expected JSON fixture.
+    """Test that the generated chart matches the expected JSON fixture.
 
     If changes are made to the `Chart` class or related libraries that affect
     the chart's rendering, the test may fail because the generated chart does

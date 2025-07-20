@@ -1,13 +1,12 @@
 import random
-from typing import List, Optional
+from typing import List, Optional, Set
 
 import pandas as pd
 import plotly.graph_objects as go  # type: ignore
 
 
 class Chart:
-    """
-    A class to generate and display interactive Plotly charts with a primary series
+    """A class to generate and display interactive Plotly charts with a primary series
     and optional secondary series in the background.
 
     Attributes:
@@ -18,6 +17,7 @@ class Chart:
         yaxis_name (str): Label for the Y-axis.
         xaxis_name (str): Label for the X-axis.
         secondary_colors (List[str]): Palette of colors for secondary series.
+
     """
 
     def __init__(
@@ -29,7 +29,7 @@ class Chart:
         yaxis_name: str = "Value",
         xaxis_name: str = "Date",
         secondary_colors: Optional[List[str]] = None,
-    ):
+    ) -> None:
         self.data = data
         self.title = title
         self.main_series = main_series
@@ -47,7 +47,7 @@ class Chart:
             "plum",
         ]
 
-    def get_random_color(self, exclude: set) -> str:
+    def get_random_color(self, exclude: Set[str]) -> str:
         """Select a random color from the palette, excluding already used colors."""
         available_colors = [c for c in self.secondary_colors if c not in exclude]
         return random.choice(available_colors) if available_colors else "gray"

@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import List
 
 
 class StrEnum(str, Enum):
@@ -24,5 +25,5 @@ class OHLCV(StrEnum):
     Volume = "Volume"
 
     @classmethod
-    def all_values(cls):
+    def all_values(cls) -> List[str]:
         return [x.value for x in list(cls)]

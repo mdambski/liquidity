@@ -12,58 +12,58 @@ from liquidity.visuals.chart import Chart
 
 class ChartableModel(Protocol):
     def get_chart(self) -> Chart:
-        """Returns a Chart object representing the model's data visualization."""
+        """Return a Chart object representing the model's data visualization."""
         ...
 
 
 class ChartMatrix:
-    """
-    A class to display liquidity proxies in a 2x2 grid of charts.
-    """
+    """A class to display liquidity proxies in a 2x2 grid of charts."""
 
     def __init__(
         self,
         models: Iterable[ChartableModel],
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
-    ):
-        """
-        Initialize the LiquidityProxies object.
+    ) -> None:
+        """Initialize the LiquidityProxies object.
 
         If no `start_date` or `end_date` are provided, all available data will be used
         for the charts. This may result in different time ranges for each chart,
         depending on the data available for each model.
 
         Args:
+            models (Iterable[ChartableModel): The collection of models to display in the matrix.
             start_date (datetime, optional): The start date of the time window for the
                                               chart. If not provided, the earliest
                                               available data is used.
             end_date (datetime, optional): The end date of the time window for the
                                             chart. If not provided, the latest
                                             available data is used.
+
         """
         self.charts = [model.get_chart() for model in models]
         self.start_date = start_date
         self.end_date = end_date
 
     def filter_data(self, data: pd.DataFrame) -> pd.DataFrame:
-        """
-        Filter the DataFrame to include only the desired time period.
+        """Filter the DataFrame to include only the desired time period.
 
         Args:
             data (pd.DataFrame): DataFrame with a DateTimeIndex.
 
         Returns:
             pd.DataFrame: Filtered DataFrame with rows for desired time frame.
+
         """
         assert isinstance(data.index, pd.DatetimeIndex)
 
         start_date = pd.Timestamp(self.start_date or data.index[0])
         end_date = pd.Timestamp(self.end_date or data.index[-1])
 
-        return data.loc[start_date:end_date]  # type: ignore[misc]
+        return data.loc[start_date:end_date]
 
     def get_chart_dimensions(self) -> Tuple[int, int]:
+        """Return the size (rows, cols) of the matrix."""
         charts_num = len(self.charts)
         cols = math.isqrt(charts_num)
 
@@ -79,14 +79,14 @@ class ChartMatrix:
         return rows, cols
 
     def add_chart_to_subplot(self, fig: go.Figure, chart: Chart, row: int, col: int) -> None:
-        """
-        Add a chart's main series to a subplot.
+        """Add a chart's main series to a subplot.
 
         Args:
             fig (go.Figure): Plotly figure object to update.
             chart (Chart): Chart object containing data and configuration.
             row (int): Row number of the subplot.
             col (int): Column number of the subplot.
+
         """
         filtered_data = self.filter_data(chart.data)
         fig.add_trace(
@@ -102,13 +102,13 @@ class ChartMatrix:
         )
 
     def show(self) -> None:
-        """
-        Display four charts in a grid using Plotly.
+        """Display four charts in a grid using Plotly.
 
         Args:
             charts (List[Chart]): List of Chart objects to display.
             yaxis_names (List[str]): Y-axis labels for each subplot.
             xaxis_name (str): X-axis label for all subplots (default: "Date").
+
         """
         rows, cols = self.get_chart_dimensions()
 
