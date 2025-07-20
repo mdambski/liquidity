@@ -1,15 +1,13 @@
-name: CI
+name: CI - Pull Request
 
 on:
-  push:
-    branches: [master]
   pull_request:
     branches: [master]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    environment: ci-approval
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
