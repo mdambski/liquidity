@@ -12,7 +12,7 @@ from liquidity.visuals.chart import Chart
 
 class ChartableModel(Protocol):
     def get_chart(self) -> Chart:
-        """Returns a Chart object representing the model's data visualization."""
+        """Return a Chart object representing the model's data visualization."""
         ...
 
 
@@ -24,7 +24,7 @@ class ChartMatrix:
         models: Iterable[ChartableModel],
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
-    ):
+    ) -> None:
         """Initialize the LiquidityProxies object.
 
         If no `start_date` or `end_date` are provided, all available data will be used
@@ -32,6 +32,7 @@ class ChartMatrix:
         depending on the data available for each model.
 
         Args:
+            models (Iterable[ChartableModel): The collection of models to display in the matrix.
             start_date (datetime, optional): The start date of the time window for the
                                               chart. If not provided, the earliest
                                               available data is used.
@@ -59,9 +60,10 @@ class ChartMatrix:
         start_date = pd.Timestamp(self.start_date or data.index[0])
         end_date = pd.Timestamp(self.end_date or data.index[-1])
 
-        return data.loc[start_date:end_date]  # type: ignore[misc]
+        return data.loc[start_date:end_date]
 
     def get_chart_dimensions(self) -> Tuple[int, int]:
+        """Return the size (rows, cols) of the matrix."""
         charts_num = len(self.charts)
         cols = math.isqrt(charts_num)
 

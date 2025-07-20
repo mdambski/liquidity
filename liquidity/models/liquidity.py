@@ -90,7 +90,7 @@ class GlobalLiquidity:
 
     @cached_property
     def raw_data(self) -> pd.DataFrame:
-        """Fetches and processes all configured FRED data series."""
+        """Fetch and process all configured FRED data series."""
         processed_series = []
 
         for name, (ticker, sign) in self.SERIES_MAPPING.items():
@@ -106,7 +106,7 @@ class GlobalLiquidity:
     def _standardize_series(
         self, df: pd.DataFrame, column: str, metadata: FredEconomicData
     ) -> pd.DataFrame:
-        """Converts series to common format by converting units and currency to Billions of USD."""
+        """Convert series to common format by converting units and currency to Billions of USD."""
         df = self._convert_currency(df, column, currency_from=metadata.currency, currency_to="USD")
         df[column] *= self.UNIT_CONVERSION_FACTORS.get(metadata.unit, 1)
         return df
@@ -166,7 +166,7 @@ class GlobalLiquidity:
         """Returns the complete liquidity data with computed index."""
         return self.liquidity_index
 
-    def show(self):
+    def show(self) -> None:
         """Plot stacked area chart of liquidity components along with
         the combined liquidity index.
         """

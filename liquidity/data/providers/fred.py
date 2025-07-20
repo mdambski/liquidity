@@ -22,12 +22,18 @@ class FredEconomicDataProvider:
 
     @cache_with_persistence
     def get_data(self, ticker: str) -> pd.DataFrame:
+        """Return data for the ticker.
+
+        Retrieves data from the FRED database and converts it into
+        the common format for time-series in the project.
+        """
         data = self.client.get_series(ticker)
         df = pd.DataFrame(data, columns=["Close"])
         df.index.name = "Date"
         return df
 
     def get_metadata(self, ticker: str) -> FredEconomicData:
+        """Return metadata for the ticker."""
         metadata = get_symbol_metadata(ticker)
         if not isinstance(metadata, FredEconomicData):
             raise ValueError(f"Expected FredEconomicData, got {type(metadata)} for {ticker}")

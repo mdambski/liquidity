@@ -1,3 +1,6 @@
+import numpy as np
+import pandas as pd
+
 from liquidity.compute.ticker import Ticker
 from liquidity.visuals import Chart
 
@@ -52,14 +55,14 @@ class YieldSpread:
 
     series_name = "Spread"
 
-    def __init__(self, ticker: str, benchmark: str = "UST-10Y"):
+    def __init__(self, ticker: str, benchmark: str = "UST-10Y") -> None:
         self.ticker = Ticker.for_symbol(ticker)
         self.benchmark = Ticker.for_symbol(benchmark)
 
     @property
-    def df(self):
-        """Returns a pandas DataFrame containing the time series of
-        yields for both instruments and their computed spread.
+    def df(self) -> pd.DataFrame:
+        """Returns a pandas DataFrame containing the time series of yields
+        for both instruments and their computed spread.
         """
         ticker = self.ticker.yields.dropna()
         benchmark = self.benchmark.yields.dropna()
@@ -74,14 +77,14 @@ class YieldSpread:
             .dropna()
         )
 
-        def spread_formula(row):
+        def spread_formula(row: pd.Series[np.float64]) -> np.float64:
             return row[f"Yield{self.ticker.symbol}"] - row[f"Yield{self.benchmark.symbol}"]
 
         yields[self.series_name] = yields.apply(spread_formula, axis=1)
         return yields
 
     def get_chart(self, show_all_series: bool = False) -> Chart:
-        """Generates a chart visualizing the yield spread over time.
+        """Generate a chart visualizing the yield spread over time.
 
         Parameters
         ----------
@@ -104,5 +107,5 @@ class YieldSpread:
         )
 
     def show(self) -> None:
-        """Generates and displays a chart visualizing the yield spread over time."""
+        """Generate and display a chart visualizing the yield spread over time."""
         self.get_chart().show()

@@ -1,5 +1,6 @@
 from functools import cached_property
 
+import numpy as np
 import pandas as pd
 
 from liquidity.compute.ticker import Ticker
@@ -61,7 +62,7 @@ class PriceRatio:
 
     series_name = "Ratio"
 
-    def __init__(self, ticker: str, benchmark: str = "SPY"):
+    def __init__(self, ticker: str, benchmark: str = "SPY") -> None:
         self.ticker = Ticker.for_symbol(ticker)
         self.benchmark = Ticker.for_symbol(benchmark)
 
@@ -79,14 +80,14 @@ class PriceRatio:
             rsuffix=self.benchmark.symbol,
         ).dropna()
 
-        def ratio_formula(row: pd.Series) -> pd.Series:
+        def ratio_formula(row: pd.Series[np.float64]) -> np.float64:
             return row[f"Close{self.ticker.symbol}"] / row[f"Close{self.benchmark.symbol}"]
 
         prices[self.series_name] = prices.apply(ratio_formula, axis=1)
         return prices
 
     def get_chart(self) -> Chart:
-        """Generates a chart visualizing the price ratio over time.
+        """Generate a chart visualizing the price ratio over time.
 
         Parameters
         ----------
@@ -104,5 +105,5 @@ class PriceRatio:
         )
 
     def show(self) -> None:
-        """Generates and displays a chart visualizing the price ratio over time."""
+        """Generate and display a chart visualizing the price ratio over time."""
         self.get_chart().show()

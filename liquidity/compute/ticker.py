@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, Dict
 
 import pandas as pd
 
@@ -21,7 +21,7 @@ class Ticker:
         symbol: str,
         metadata: AssetMetadata,
         provider: DataProviderBase,
-        cache: dict,
+        cache: Dict[str, pd.DataFrame],
     ):
         """Initialize a Ticker object.
 

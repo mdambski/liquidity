@@ -29,7 +29,7 @@ class Chart:
         yaxis_name: str = "Value",
         xaxis_name: str = "Date",
         secondary_colors: Optional[List[str]] = None,
-    ):
+    ) -> None:
         self.data = data
         self.title = title
         self.main_series = main_series

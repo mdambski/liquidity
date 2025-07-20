@@ -32,6 +32,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 line-length = 100
+exclude = ["tests"]
 
 [tool.ruff.lint]
 select = [
@@ -43,7 +44,9 @@ select = [
 ]
 
 ignore = [
+  "D100",    # missing docstring in public module
   "D107",    # allow missing docstring in __init__
+  "D205",    # allow multiline summary of the class.
   "D203",    # incompatible with D211 (no-blank-line-before-class)
   "D213",    # incompatible with D212 (multi-line-summary-first-line)
 ]

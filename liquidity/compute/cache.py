@@ -3,7 +3,7 @@ import hashlib
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence, Union
+from typing import Any, Callable, Dict, Mapping, Sequence, Union
 
 import pandas as pd
 from pydantic import Field
@@ -37,12 +37,13 @@ def generate_cache_key(
     return hashlib.blake2b(key.encode()).hexdigest()
 
 
-def cache_with_persistence(func: Callable[..., Any]):
-    """Decorator to cache function outputs in-memory and persist to disk."""
-    cache, cache_dir = {}, CacheConfig.cache_dir()
+def cache_with_persistence(func: Callable[..., pd.DataFrame]) -> Callable[..., pd.DataFrame]:
+    """Decorator that caches DataFrame results in‑memory and persists to CSV on disk."""
+    cache: Dict[str, pd.DataFrame] = {}
+    cache_dir: Path = CacheConfig.cache_dir()
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: str, **kwargs: str) -> pd.DataFrame:
         key = generate_cache_key(func, args[1:], kwargs)
 
         if key in cache:
@@ -64,14 +65,14 @@ def cache_with_persistence(func: Callable[..., Any]):
     return wrapper
 
 
-class InMemoryCacheWithPersistence(dict):
+class InMemoryCacheWithPersistence(Dict[str, pd.DataFrame]):
     """In-memory cache with file system persistence.
 
     Holds data in-memory but saves it locally, in order to retrieve
     data between executions. This can lower number of api calls.
     """
 
-    def __init__(self, cache_dir: Union[str, Path]):
+    def __init__(self, cache_dir: Union[str, Path]) -> None:
         super().__init__()
         self.cache_dir = os.path.join(cache_dir, self.get_date())
         self.ensure_cache_dir()
@@ -80,28 +81,28 @@ class InMemoryCacheWithPersistence(dict):
         formatted_date = datetime.now().strftime("%Y%m%d")
         return formatted_date
 
-    def ensure_cache_dir(self):
+    def ensure_cache_dir(self) -> None:
         if not os.path.exists(self.cache_dir):
             os.makedirs(self.cache_dir)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: pd.DataFrame) -> None:
         super().__setitem__(key, value)
         value.to_csv(os.path.join(self.cache_dir, f"{key}.csv"))
 
-    def __missing__(self, key):
+    def __missing__(self, key: str) -> pd.DataFrame:
         """Load data from disk if not in memory yet."""
         file_path = os.path.join(self.cache_dir, f"{key}.csv")
         if not os.path.exists(file_path):
             raise KeyError(key)
 
         idx_name = Fields.Date.value
-        value = pd.read_csv(file_path, index_col=idx_name, parse_dates=[idx_name])
-        super().__setitem__(key, value)
+        df = pd.read_csv(file_path, index_col=idx_name, parse_dates=[idx_name])
+        super().__setitem__(key, df)
 
-        return value
+        return df
 
 
-def get_cache() -> dict:
+def get_cache() -> Union[InMemoryCacheWithPersistence, Dict[str, pd.DataFrame]]:
     """Return cache instance"""
     cache_config = CacheConfig()
     if cache_config.enabled:
