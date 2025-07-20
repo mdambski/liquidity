@@ -27,7 +27,7 @@ class AlphaVantageDataProvider(DataProviderBase):
         self.api_key = api_key or AlphaVantageConfig().api_key
         self.output_format = "pandas"
 
-    def get_prices(self, ticker, output_size: str = "full") -> pd.DataFrame:
+    def get_prices(self, ticker: str, output_size: str = "full") -> pd.DataFrame:
         """Fetches daily price data for a given ticker symbol.
 
         Args:

@@ -17,7 +17,7 @@ class FredConfig(BaseSettings):
 
 
 class FredEconomicDataProvider:
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None) -> None:
         self.client = Fred(api_key=api_key or FredConfig().api_key)
 
     @cache_with_persistence

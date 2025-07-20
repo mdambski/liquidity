@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, cast
 
 import pandas as pd
-from alpaca.data import CryptoBarsRequest, CryptoHistoricalDataClient, TimeFrame
+from alpaca.data import BarSet, CryptoBarsRequest, CryptoHistoricalDataClient, TimeFrame
 from dateutil.relativedelta import relativedelta
 
 from liquidity.data.format import formatter_factory
@@ -15,7 +15,7 @@ class AlpacaCryptoDataProvider(DataProviderBase):
     using Alpaca's CryptoHistoricalDataClient.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = CryptoHistoricalDataClient()
 
     def get_prices(
@@ -67,7 +67,8 @@ class AlpacaCryptoDataProvider(DataProviderBase):
             start=start,
             end=end,
         )
-        return self.client.get_crypto_bars(request_params).df
+        result = cast(BarSet, self.client.get_crypto_bars(request_params))
+        return result.df
 
     def _format_dataframe(self, df: pd.DataFrame) -> pd.DataFrame:
         """Format the raw dataframe fetched from the Alpaca API to the project's

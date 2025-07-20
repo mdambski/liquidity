@@ -22,7 +22,7 @@ class Ticker:
         metadata: AssetMetadata,
         provider: DataProviderBase,
         cache: Dict[str, pd.DataFrame],
-    ):
+    ) -> None:
         """Initialize a Ticker object.
 
         Args:

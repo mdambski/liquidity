@@ -83,7 +83,7 @@ class GlobalLiquidity:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         provider: Optional[FredEconomicDataProvider] = None,
-    ):
+    ) -> None:
         self.provider = provider or FredEconomicDataProvider()
         self.start_date = pd.Timestamp(start_date) if start_date else None
         self.end_date = pd.Timestamp(end_date) if end_date else None
@@ -147,7 +147,7 @@ class GlobalLiquidity:
 
         start = self.start_date or df.index.min()
         end = self.end_date or df.index.max()
-        return df.loc[start:end]  # type: ignore[misc]
+        return df.loc[start:end]
 
     @property
     def liquidity_index(self) -> pd.DataFrame:
