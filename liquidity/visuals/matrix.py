@@ -17,9 +17,7 @@ class ChartableModel(Protocol):
 
 
 class ChartMatrix:
-    """
-    A class to display liquidity proxies in a 2x2 grid of charts.
-    """
+    """A class to display liquidity proxies in a 2x2 grid of charts."""
 
     def __init__(
         self,
@@ -27,8 +25,7 @@ class ChartMatrix:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
     ):
-        """
-        Initialize the LiquidityProxies object.
+        """Initialize the LiquidityProxies object.
 
         If no `start_date` or `end_date` are provided, all available data will be used
         for the charts. This may result in different time ranges for each chart,
@@ -41,20 +38,21 @@ class ChartMatrix:
             end_date (datetime, optional): The end date of the time window for the
                                             chart. If not provided, the latest
                                             available data is used.
+
         """
         self.charts = [model.get_chart() for model in models]
         self.start_date = start_date
         self.end_date = end_date
 
     def filter_data(self, data: pd.DataFrame) -> pd.DataFrame:
-        """
-        Filter the DataFrame to include only the desired time period.
+        """Filter the DataFrame to include only the desired time period.
 
         Args:
             data (pd.DataFrame): DataFrame with a DateTimeIndex.
 
         Returns:
             pd.DataFrame: Filtered DataFrame with rows for desired time frame.
+
         """
         assert isinstance(data.index, pd.DatetimeIndex)
 
@@ -79,14 +77,14 @@ class ChartMatrix:
         return rows, cols
 
     def add_chart_to_subplot(self, fig: go.Figure, chart: Chart, row: int, col: int) -> None:
-        """
-        Add a chart's main series to a subplot.
+        """Add a chart's main series to a subplot.
 
         Args:
             fig (go.Figure): Plotly figure object to update.
             chart (Chart): Chart object containing data and configuration.
             row (int): Row number of the subplot.
             col (int): Column number of the subplot.
+
         """
         filtered_data = self.filter_data(chart.data)
         fig.add_trace(
@@ -102,13 +100,13 @@ class ChartMatrix:
         )
 
     def show(self) -> None:
-        """
-        Display four charts in a grid using Plotly.
+        """Display four charts in a grid using Plotly.
 
         Args:
             charts (List[Chart]): List of Chart objects to display.
             yaxis_names (List[str]): Y-axis labels for each subplot.
             xaxis_name (str): X-axis label for all subplots (default: "Date").
+
         """
         rows, cols = self.get_chart_dimensions()
 

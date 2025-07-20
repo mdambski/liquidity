@@ -7,22 +7,21 @@ from liquidity.visuals import Chart
 
 
 class PriceRatio:
-    """
-    Computes and visualizes the price ratio between two financial instruments.
+    """Computes and visualizes the price ratio between two financial instruments.
 
     The price ratio represents the relative price relationship between a primary
     financial instrument (`ticker`) and a benchmark (`benchmark`). This class
     provides functionality to calculate the time series of prices, compute the
     price ratio, and visualize the results using an interactive Plotly line chart.
 
-    Attributes:
+    Attributes
     ----------
     ticker : Ticker
         The financial instrument for which the price ratio is calculated.
     benchmark : Ticker
         The benchmark financial instrument used for comparison.
 
-    Methods:
+    Methods
     -------
     df:
         Returns a pandas DataFrame containing the time series of prices for
@@ -32,7 +31,7 @@ class PriceRatio:
         Generates and displays an interactive Plotly chart to visualize
         the price ratio over time.
 
-    Examples:
+    Examples
     --------
     Calculate and visualize the price ratio between two assets:
 
@@ -57,6 +56,7 @@ class PriceRatio:
     ...
 
     >>> ratio.show()
+
     """
 
     series_name = "Ratio"
@@ -79,21 +79,21 @@ class PriceRatio:
             rsuffix=self.benchmark.symbol,
         ).dropna()
 
-        def ratio_formula(row):
+        def ratio_formula(row: pd.Series) -> pd.Series:
             return row[f"Close{self.ticker.symbol}"] / row[f"Close{self.benchmark.symbol}"]
 
         prices[self.series_name] = prices.apply(ratio_formula, axis=1)
         return prices
 
     def get_chart(self) -> Chart:
-        """
-        Generates a chart visualizing the price ratio over time.
+        """Generates a chart visualizing the price ratio over time.
 
-        Parameters:
+        Parameters
         ----------
         show_all_series : bool, optional
             If True, includes all available time series in the chart (default is False,
             which displays only the yield spread).
+
         """
         return Chart(
             data=self.df,

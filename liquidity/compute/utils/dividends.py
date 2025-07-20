@@ -25,6 +25,7 @@ def compute_ttm_dividend(
         a year, then during this period the rolling sum will represent not the entire
         year, but a part of the year. In such cases the TTM dividend yield will not be
         representative of the entire year.
+
     """
     if not df.index.is_monotonic_increasing:
         raise ValueError("Dates should be sorted in ascending order")

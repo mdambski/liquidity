@@ -23,8 +23,7 @@ class Ticker:
         provider: DataProviderBase,
         cache: dict,
     ):
-        """
-        Initialize a Ticker object.
+        """Initialize a Ticker object.
 
         Args:
             symbol (str): The ticker symbol.
@@ -36,8 +35,9 @@ class Ticker:
             Use the `Ticker.for_symbol(symbol: str)` class method for easier
             initialization.
 
-            Example:
+        Example:
                 ticker = Ticker.for_symbol("SPX")
+
         """
         self.symbol = symbol
         self.metadata = metadata

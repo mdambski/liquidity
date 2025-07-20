@@ -1,12 +1,9 @@
-from functools import cached_property
-
 from liquidity.compute.ticker import Ticker
 from liquidity.visuals import Chart
 
 
 class YieldSpread:
-    """
-    Calculate and visualize the yield spread between two financial instruments.
+    """Calculate and visualize the yield spread between two financial instruments.
 
     The yield spread represents the difference in yields (expressed as percentage
     points) between a given financial instrument (ticker) and a benchmark.
@@ -31,7 +28,7 @@ class YieldSpread:
         the yield spread over time.
 
     Example:
-    --------
+    -------
     Calculate and visualize the yield spread between HYG (High Yield Corporate Bond ETF)
     and LQD (Investment Grade Corporate Bond ETF):
 
@@ -50,6 +47,7 @@ class YieldSpread:
 
     >>> spread = YieldSpread("HYG")
     >>> spread.show()
+
     """
 
     series_name = "Spread"
@@ -58,7 +56,7 @@ class YieldSpread:
         self.ticker = Ticker.for_symbol(ticker)
         self.benchmark = Ticker.for_symbol(benchmark)
 
-    @cached_property
+    @property
     def df(self):
         """Returns a pandas DataFrame containing the time series of
         yields for both instruments and their computed spread.
@@ -83,14 +81,14 @@ class YieldSpread:
         return yields
 
     def get_chart(self, show_all_series: bool = False) -> Chart:
-        """
-        Generates a chart visualizing the yield spread over time.
+        """Generates a chart visualizing the yield spread over time.
 
-        Parameters:
+        Parameters
         ----------
         show_all_series : bool, optional
             If True, includes all available time series in the chart (default is False,
             which displays only the yield spread).
+
         """
         secondary_series = None
         if show_all_series:

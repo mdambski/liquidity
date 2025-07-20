@@ -11,8 +11,7 @@ from liquidity.models.liquidity import GlobalLiquidity
 
 @pytest.fixture
 def mock_provider():
-    """
-    Provides a mocked FredEconomicDataProvider
+    """Provides a mocked FredEconomicDataProvider
     whose get_data() and get_metadata() return dummy data.
     """
     provider = mock.Mock()
@@ -32,17 +31,13 @@ def mock_provider():
 
 @pytest.fixture
 def liquidity_dates():
-    """
-    Provides a fixed date range for liquidity tests.
-    """
+    """Provides a fixed date range for liquidity tests."""
     return pd.date_range(start="2020-01-01", periods=3, freq="W")
 
 
 @pytest.fixture
 def liquidity_series_factory(liquidity_dates):
-    """
-    Returns a function to create a constant time series DataFrame.
-    """
+    """Returns a function to create a constant time series DataFrame."""
 
     def _make(value):
         return pd.DataFrame(
@@ -118,11 +113,9 @@ def test_liquidity_index_calculation(
     liquidity_series_factory,
     case,
 ):
-    """
-    Tests that GlobalLiquidity correctly sums positive and negative series
+    """Tests that GlobalLiquidity correctly sums positive and negative series
     across different scenarios.
     """
-
     # Create dummy timeseries for each ticker
     series_mapping = {
         "ECBASSETSW": liquidity_series_factory(case.ecb),
@@ -242,12 +235,10 @@ def test_standardize_series(
     dates,
     case,
 ):
-    """
-    Test _standardize_series for:
+    """Test _standardize_series for:
     - unit conversion (e.g. Millions -> Billions, Trillions -> Billions)
     - currency conversion via FX rates
     """
-
     # Create input series with specified values
     input_series = pd.DataFrame(
         {"Close": case.input_values},
@@ -297,10 +288,7 @@ def test_standardize_series(
 
 
 def test_currency_conversion_with_misaligned_dates(mock_provider, fx_series_factory, dates):
-    """
-    Verify currency conversion aligns FX rates by date and drops missing.
-    """
-
+    """Verify currency conversion aligns FX rates by date and drops missing."""
     # Main data: denominated in EUR with weekly intervals
     data_series = pd.DataFrame({"Close": [10, 20, 30, 40, 50]}, index=dates)
 

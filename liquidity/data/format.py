@@ -1,20 +1,20 @@
-from typing import Callable, Optional
+from typing import Callable, Dict, Optional
 
 import pandas as pd
 
 
 def formatter_factory(
-    cols_mapper: Optional[dict] = None,
+    cols_mapper: Optional[Dict[str, str]] = None,
     index_col: Optional[str] = None,
     index_name: Optional[str] = None,
     cols_out: Optional[list[str]] = None,
     to_numeric: Optional[list[str]] = None,
     ensure_sorted: bool = True,
 ) -> Callable[[pd.DataFrame], pd.DataFrame]:
-    """
-    Returns a formatter function for dataframe post-processing.
+    """Returns a formatter function for dataframe post-processing.
 
-    Parameters:
+    Parameters
+    ----------
         cols_mapper (dict, optional): Column renaming mapping.
         index_col (str, optional): Column to use as the index.
         index_name (str, optional): New name for the index.
@@ -22,8 +22,10 @@ def formatter_factory(
         to_numeric (list[str], optional): Columns to convert to numeric types.
         ensure_sorted (bool): Whether to ensure the dataframe is sorted by its index.
 
-    Returns:
+    Returns
+    -------
         Callable[[pd.DataFrame], pd.DataFrame]: A function to format dataframes.
+
     """
 
     def format_func(df: pd.DataFrame) -> pd.DataFrame:
@@ -50,11 +52,14 @@ def formatter_factory(
 def ensure_dataframe_sorted(df: pd.DataFrame) -> pd.DataFrame:
     """Ensure dataframe index is sorted.
 
-    Parameters:
+    Parameters
+    ----------
         df (pd.DataFrame): Input dataframe.
 
-    Returns:
+    Returns
+    -------
         pd.DataFrame: Dataframe with a sorted index.
+
     """
     if df.index.is_monotonic_increasing:
         return df

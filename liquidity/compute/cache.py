@@ -3,7 +3,7 @@ import hashlib
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Union
+from typing import Any, Callable, Mapping, Sequence, Union
 
 import pandas as pd
 from pydantic import Field
@@ -29,13 +29,15 @@ class CacheConfig(BaseSettings):
         return path
 
 
-def generate_cache_key(func, args, kwargs):
+def generate_cache_key(
+    func: Callable[..., Any], args: Sequence[str], kwargs: Mapping[str, str]
+) -> str:
     """Generate a unique cache key based on function name and arguments."""
     key = "-".join([func.__name__, *args, *kwargs])
     return hashlib.blake2b(key.encode()).hexdigest()
 
 
-def cache_with_persistence(func):
+def cache_with_persistence(func: Callable[..., Any]):
     """Decorator to cache function outputs in-memory and persist to disk."""
     cache, cache_dir = {}, CacheConfig.cache_dir()
 

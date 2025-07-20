@@ -10,7 +10,6 @@ tasks:
 
   lint:
     desc: Run Ruff in check mode and MyPy
-    deps: [mypy]
     cmds:
       - poetry run ruff check
       - poetry run ruff format . --check

@@ -10,8 +10,7 @@ from liquidity.data.providers.fred import FredEconomicDataProvider
 
 
 class GlobalLiquidity:
-    """
-    The Global Liquidity model estimates net financial system liquidity using key
+    """The Global Liquidity model estimates net financial system liquidity using key
     macroeconomic indicators from the FRED database. It captures how central banks and fiscal
     authorities inject or withdraw liquidity from markets.
 
@@ -57,6 +56,7 @@ class GlobalLiquidity:
     --------
     >>> model = GlobalLiquidity(start_date=datetime(2020, 1, 1))
     >>> model.show()
+
     """
 
     SERIES_MAPPING: Dict[str, Tuple[str, int]] = {
@@ -151,10 +151,11 @@ class GlobalLiquidity:
 
     @property
     def liquidity_index(self) -> pd.DataFrame:
-        """
-        Computes the total net liquidity index.
+        """Computes the total net liquidity index.
+
         Returns:
             pd.DataFrame: Original series + computed 'Liquidity Index' column.
+
         """
         df = self.raw_data.copy()
         df["Liquidity Index"] = df.sum(axis=1)
