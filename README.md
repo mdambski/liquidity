@@ -1,5 +1,7 @@
-[![codecov](https://codecov.io/gh/mdambski/liquidity/branch/master/graph/badge.svg)](https://codecov.io/gh/mdambski/liquidity/tree/master)
-
+![CI](https://github.com/mdambski/liquidity/actions/workflows/post-pr.yml/badge.svg)
+[![Coverage](https://codecov.io/gh/mdambski/liquidity/branch/master/graph/badge.svg)](https://codecov.io/gh/mdambski/liquidity)
+![PyPI](https://img.shields.io/pypi/v/liquidity)
+![License](https://img.shields.io/github/license/mdambski/liquidity)
 
 # Market Liquidity Proxies
 

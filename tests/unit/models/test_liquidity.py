@@ -168,7 +168,7 @@ def fx_series_factory():
     return _factory
 
 
-TestCase = namedtuple(
+StandarizeTestCase = namedtuple(
     "TestCase",
     [
         "currency_from",
@@ -182,7 +182,7 @@ TestCase = namedtuple(
 )
 
 TEST_CASES = [
-    TestCase(
+    StandarizeTestCase(
         currency_from="USD",
         unit_from="Millions",
         fx_ticker=None,
@@ -191,7 +191,7 @@ TEST_CASES = [
         expected_values=[1.0, 2.0, 3.0, 4.0, 5.0],
         description="USD, Millions -> Billions",
     ),
-    TestCase(
+    StandarizeTestCase(
         currency_from="USD",
         unit_from="Trillions",
         fx_ticker=None,
@@ -200,7 +200,7 @@ TEST_CASES = [
         expected_values=[1000, 2000, 3000, 4000, 5000],
         description="USD, Trillions -> Billions",
     ),
-    TestCase(
+    StandarizeTestCase(
         currency_from="EUR",
         unit_from="Billions",
         fx_ticker="DEXUSEU",
@@ -209,7 +209,7 @@ TEST_CASES = [
         expected_values=[12.0, 24.0, 36.0, 48.0, 60.0],
         description="EUR, Billions -> USD",
     ),
-    TestCase(
+    StandarizeTestCase(
         currency_from="JPY",
         unit_from="Trillions",
         fx_ticker="DEXJPUS",
