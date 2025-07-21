@@ -5,3 +5,12 @@ coverage:
         target: 80%
         base: auto
         informational: false
+    patch:
+      default:
+        target: 80%
+        informational: false
+flags:
+  pr:
+    carryforward: false
+  main-build:
+    carryforward: true

@@ -1,0 +1,47 @@
+name: Release to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*'  # Runs only on version tags like v1.2.3
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+
+      - name: Extract tag version
+        id: get_tag
+        run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Validate pyproject.toml version matches tag
+        run: |
+          PYPROJECT_VERSION=$(poetry version -s)
+          if [ "$PYPROJECT_VERSION" != "$TAG_VERSION" ]; then
+            echo "Version mismatch! Tag is v$TAG_VERSION but pyproject.toml has $PYPROJECT_VERSION"
+            exit 1
+          fi
+          echo "Version check passed: $PYPROJECT_VERSION"
+
+      - name: Configure Poetry for publishing
+        run: poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+
+      - name: Install dependencies
+        run: poetry install --no-dev
+
+      - name: Build package
+        run: poetry build
+
+      - name: Publish to PyPI
+        run: poetry publish
