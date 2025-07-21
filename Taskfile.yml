@@ -1,15 +1,20 @@
 version: '3'
 
 tasks:
+  install-deps:
+    desc: Install all dependencies (runtime + dev)
+    cmds:
+      - poetry install --with dev
+
   delint:
-    desc: Run Ruff in fix and format mode
+    desc: Autofix & format code
     cmds:
       - poetry run ruff check --fix-only
       - poetry run ruff format .
       - poetry run mypy . --pretty --strict
 
   lint:
-    desc: Run Ruff in check mode and MyPy
+    desc: Verify code styles & types
     cmds:
       - poetry run ruff check
       - poetry run ruff format . --check
@@ -17,15 +22,12 @@ tasks:
 
   test:
     desc: Run unit tests with coverage
+    deps: [install-deps]
     cmds:
       - poetry run pytest tests/ --cov=liquidity --ignore tests/e2e --cov-report=xml
 
   test-e2e:
     desc: Run end-to-end tests
+    deps: [install-deps]
     cmds:
       - poetry run pytest tests/e2e
-
-  install-deps:
-    desc: Install development dependencies
-    cmds:
-      - poetry install --with dev
