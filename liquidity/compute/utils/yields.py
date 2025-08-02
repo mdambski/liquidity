@@ -17,5 +17,5 @@ def compute_dividend_yield(prices: pd.DataFrame, dividends: pd.DataFrame) -> pd.
     def yield_formula(row: pd.Series[np.float64]) -> np.float64:
         return ((row[Fields.TTM_Dividend] or 0.0) / row[OHLCV.Close]) * 100.0
 
-    df[Fields.Yield] = df.apply(yield_formula, axis=1)
-    return df[[Fields.Yield]]
+    df[Fields.Yield.value] = df.apply(yield_formula, axis=1)
+    return df[[Fields.Yield.value]]
